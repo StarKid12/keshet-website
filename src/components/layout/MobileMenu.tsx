@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, SITE_NAME } from "@/lib/constants";
@@ -13,10 +13,14 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const pathname = usePathname();
+  const prevPathname = useRef(pathname);
 
-  // Close on route change
+  // Close on route change (but not on initial mount)
   useEffect(() => {
-    onClose();
+    if (prevPathname.current !== pathname) {
+      onClose();
+      prevPathname.current = pathname;
+    }
   }, [pathname, onClose]);
 
   return (

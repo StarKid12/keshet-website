@@ -22,7 +22,8 @@ export function Navbar() {
 
       // On homepage, hide navbar during spiral animation (pinned for ~1500px)
       // Show it once the user has scrolled past the spiral section
-      if (isHome) {
+      if (isHome && window.innerWidth >= 1024) {
+        // Only hide navbar during spiral on desktop
         setIsVisible(scrollY < 10 || scrollY > 1200);
       } else {
         setIsVisible(true);
