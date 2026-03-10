@@ -14,17 +14,6 @@ interface MobileMenuProps {
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
   // Close on route change
   useEffect(() => {
     onClose();
@@ -34,7 +23,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-200 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -42,12 +31,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
       {/* Top dropdown panel */}
       <div
-        className={`fixed top-0 right-0 left-0 z-50 bg-white shadow-xl lg:hidden
-          transition-transform duration-300 ease-out
-          ${isOpen ? "translate-y-0" : "-translate-y-full"}`}
+        className={`fixed top-0 right-0 left-0 z-50 bg-white lg:hidden
+          overflow-hidden transition-all duration-300 ease-out
+          ${isOpen ? "max-h-[80vh] shadow-xl opacity-100" : "max-h-0 shadow-none opacity-0"}`}
+        style={{ willChange: "max-height, opacity" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-sand-200">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-sand-100">
           <img src="/images/logo.png" alt={SITE_NAME} className="h-9" />
           <button
             onClick={onClose}
