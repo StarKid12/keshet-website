@@ -41,3 +41,6 @@ next-env.d.ts
 
 # manual/source files
 /manual/
+
+# Local Netlify folder
+.netlify
