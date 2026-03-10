@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme {
+  /* Rainbow-inspired color palette for Keshet (קשת = Rainbow) */
+  /* Sophisticated, warm rainbow - not garish */
+
+  /* Primary - warm amber/gold */
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
+
+  /* Rainbow accent colors */
+  --color-rainbow-red: #e74c3c;
+  --color-rainbow-orange: #f39c12;
+  --color-rainbow-yellow: #f1c40f;
+  --color-rainbow-green: #27ae60;
+  --color-rainbow-blue: #2980b9;
+  --color-rainbow-indigo: #5b4dbd;
+  --color-rainbow-violet: #8e44ad;
+
+  /* Neutral tones */
+  --color-sand-50: #fefcf9;
+  --color-sand-100: #fdf8f0;
+  --color-sand-200: #f5ede0;
+  --color-sand-300: #e8dcc8;
+  --color-sand-400: #d4c4a8;
+  --color-sand-500: #b8a88a;
+  --color-sand-600: #96866a;
+  --color-sand-700: #6b6050;
+  --color-sand-800: #4a4238;
+  --color-sand-900: #2d2822;
+
+  /* Font family */
+  --font-heebo: "Heebo", sans-serif;
+
+  /* Breakpoints */
+  --breakpoint-xs: 475px;
+}
+
+/* Rainbow gradient utility */
+.rainbow-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-rainbow-red) 0%,
+    var(--color-rainbow-orange) 16%,
+    var(--color-rainbow-yellow) 33%,
+    var(--color-rainbow-green) 50%,
+    var(--color-rainbow-blue) 66%,
+    var(--color-rainbow-indigo) 83%,
+    var(--color-rainbow-violet) 100%
+  );
+}
+
+.rainbow-gradient-subtle {
+  background: linear-gradient(
+    135deg,
+    rgba(231, 76, 60, 0.1) 0%,
+    rgba(243, 156, 18, 0.1) 16%,
+    rgba(241, 196, 15, 0.1) 33%,
+    rgba(39, 174, 96, 0.1) 50%,
+    rgba(41, 128, 185, 0.1) 66%,
+    rgba(91, 77, 189, 0.1) 83%,
+    rgba(142, 68, 173, 0.1) 100%
+  );
+}
+
+/* Rainbow border divider */
+.rainbow-divider {
+  height: 4px;
+  background: linear-gradient(
+    to left,
+    var(--color-rainbow-red),
+    var(--color-rainbow-orange),
+    var(--color-rainbow-yellow),
+    var(--color-rainbow-green),
+    var(--color-rainbow-blue),
+    var(--color-rainbow-indigo),
+    var(--color-rainbow-violet)
+  );
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-heebo);
+  color: var(--color-sand-900);
+  background-color: #ffffff;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-sand-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sand-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sand-500);
+}
