@@ -237,7 +237,7 @@ export function HeroSpiral() {
         </div>
 
         {/* CTA */}
-        <div ref={ctaRef} className="flex flex-col sm:flex-row items-center gap-4 mt-10 opacity-0 w-full max-w-sm sm:max-w-none mx-auto sm:mx-0">
+        <div ref={ctaRef} className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10 opacity-0 w-full max-w-sm sm:max-w-none mx-auto">
           <Link href="/about" className="w-full sm:w-auto">
             <Button size="lg" className="text-lg px-10 py-3 w-full sm:w-auto">
               הכירו אותנו
