@@ -205,9 +205,9 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { name: "בית צעירים", grades: "גן - כיתה ב׳", color: RAINBOW_COLORS[0], emoji: "🌱" },
-              { name: "חממה", grades: "כיתות ג׳-ה׳", color: RAINBOW_COLORS[1], emoji: "🌿" },
-              { name: 'שכב"ג', grades: "כיתות ו׳-ח׳", color: RAINBOW_COLORS[3], emoji: "🎯" },
-              { name: "תיכון", grades: "כיתות ט׳-י״ב", color: RAINBOW_COLORS[4], emoji: "🎓" },
+              { name: "חממה", grades: "כיתות ג׳-ה׳", color: RAINBOW_COLORS[1], emoji: "🪴" },
+              { name: 'שכב"ג', grades: "כיתות ו׳-ח׳", color: RAINBOW_COLORS[3], emoji: "🌿" },
+              { name: "תיכון", grades: "כיתות ט׳-י״ב", color: RAINBOW_COLORS[4], emoji: "🌳" },
             ].map((level) => (
               <div
                 key={level.name}
