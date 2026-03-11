@@ -11,9 +11,14 @@ export function useImageUpload(bucket: string = "site-content") {
   ): Promise<string | null> {
     setUploading(true);
     try {
+      // Sanitize path: replace non-ASCII chars (e.g. Hebrew) with random string
+      const safePath = path.replace(/[^\x00-\x7F]+/g, () =>
+        Math.random().toString(36).substring(2, 8)
+      );
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("path", path);
+      formData.append("path", safePath);
       formData.append("bucket", bucket);
 
       const res = await fetch("/api/admin/upload", {
