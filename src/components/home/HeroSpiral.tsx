@@ -237,17 +237,17 @@ export function HeroSpiral() {
         </div>
 
         {/* CTA */}
-        <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 mt-10 opacity-0">
-          <Link href="/about">
-            <Button size="lg" className="text-lg px-10 py-3">
+        <div ref={ctaRef} className="flex flex-col sm:flex-row items-center gap-4 mt-10 opacity-0 w-full max-w-sm sm:max-w-none mx-auto sm:mx-0">
+          <Link href="/about" className="w-full sm:w-auto">
+            <Button size="lg" className="text-lg px-10 py-3 w-full sm:w-auto">
               הכירו אותנו
             </Button>
           </Link>
-          <Link href="/admissions">
+          <Link href="/admissions" className="w-full sm:w-auto">
             <Button
               size="lg"
               variant="outline"
-              className="text-lg px-10 py-3 border-white/50 text-white hover:bg-white/10"
+              className="text-lg px-10 py-3 w-full sm:w-auto border-white/50 text-white hover:bg-white/10"
             >
               הרשמה
             </Button>
