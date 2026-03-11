@@ -61,6 +61,25 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Admin Link */}
+      {profile?.role === "admin" && (
+        <Link
+          href="/admin"
+          className="flex items-center gap-4 bg-gradient-to-l from-sand-900 to-sand-800 rounded-2xl p-5 mb-8 text-white hover:shadow-lg transition-all group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-xl shrink-0 group-hover:bg-white/20 transition-colors">
+            ⚙️
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-sm">לוח ניהול</h3>
+            <p className="text-xs text-sand-300">ניהול משתמשים, בלוג, אירועים והודעות</p>
+          </div>
+          <svg className="w-5 h-5 text-sand-400 shrink-0 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      )}
+
       {/* Quick Links */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {quickLinks.map((link) => (
