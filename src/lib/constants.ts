@@ -8,7 +8,9 @@ export const NAV_ITEMS = [
   { label: "לימודים", href: "/academics" },
   { label: "צוות", href: "/staff" },
   { label: "הרשמה", href: "/admissions" },
+  { label: "הדמוקרטיה בקשת", href: "/democracy" },
   { label: "חיים בקשת", href: "/community" },
+  { label: "אירועים", href: "/events" },
   { label: "בלוג", href: "/blog" },
   { label: "צור קשר", href: "/contact" },
 ] as const;
