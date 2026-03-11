@@ -4,21 +4,21 @@ import { RAINBOW_COLORS } from "@/lib/constants";
 
 const highlights = [
   {
-    title: "גן וחינוך מוקדם",
+    title: "בית צעירים",
     description: "סביבה מטפחת ומעשירה לגילאי הגן, עם דגש על למידה דרך משחק וחוויה.",
     image: "https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=600&q=80",
     href: "/academics",
     color: RAINBOW_COLORS[0],
   },
   {
-    title: "בית ספר יסודי",
+    title: "חממה",
     description: "חינוך יסודי שמשלב לימודים אקדמיים עם ערכים דמוקרטיים ויהודיים-פלורליסטיים.",
     image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&q=80",
     href: "/academics",
     color: RAINBOW_COLORS[1],
   },
   {
-    title: "חטיבת ביניים",
+    title: 'שכב"ג',
     description: "שנות המעבר - ליווי אישי, העצמה ופיתוח חשיבה עצמאית ואחראית.",
     image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80",
     href: "/academics",
