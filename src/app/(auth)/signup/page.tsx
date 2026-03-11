@@ -33,7 +33,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -54,6 +54,20 @@ export default function SignupPage() {
       }
       setIsLoading(false);
       return;
+    }
+
+    // Check if user was auto-approved
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_approved")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profile?.is_approved) {
+        router.push("/dashboard");
+        return;
+      }
     }
 
     router.push("/pending-approval");
