@@ -1,14 +1,40 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { RAINBOW_COLORS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
+import type { ContactInfo } from "@/lib/types/cms";
+
+const defaultContact: ContactInfo = {
+  address: "זכרון יעקב, ישראל",
+  phone: "04-XXX-XXXX",
+  email: "info@keshet-school.co.il",
+  hours: "ראשון-חמישי 07:30-16:00",
+};
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [contact, setContact] = useState<ContactInfo>(defaultContact);
+
+  useEffect(() => {
+    async function fetchContact() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("site_content")
+        .select("content")
+        .eq("page", "global")
+        .eq("section", "contact_info")
+        .single();
+      if (data?.content) {
+        setContact({ ...defaultContact, ...(data.content as ContactInfo) });
+      }
+    }
+    fetchContact();
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -18,6 +44,50 @@ export default function ContactPage() {
     setIsSubmitting(false);
     setIsSubmitted(true);
   }
+
+  const contactItems = [
+    {
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+      label: "כתובת",
+      value: contact.address,
+      color: RAINBOW_COLORS[0],
+    },
+    {
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+      ),
+      label: "טלפון",
+      value: contact.phone,
+      color: RAINBOW_COLORS[3],
+    },
+    {
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+      label: "אימייל",
+      value: contact.email,
+      color: RAINBOW_COLORS[4],
+    },
+    {
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      label: "שעות פעילות",
+      value: contact.hours,
+      color: RAINBOW_COLORS[6],
+    },
+  ];
 
   return (
     <>
@@ -52,38 +122,13 @@ export default function ContactPage() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input
-                      label="שם מלא"
-                      name="name"
-                      placeholder="שם מלא"
-                      required
-                    />
-                    <Input
-                      label="טלפון"
-                      name="phone"
-                      type="tel"
-                      dir="ltr"
-                      placeholder="05X-XXX-XXXX"
-                    />
+                    <Input label="שם מלא" name="name" placeholder="שם מלא" required />
+                    <Input label="טלפון" name="phone" type="tel" dir="ltr" placeholder="05X-XXX-XXXX" />
                   </div>
-                  <Input
-                    label="אימייל"
-                    name="email"
-                    type="email"
-                    dir="auto"
-                    placeholder="example@email.com"
-                    required
-                  />
+                  <Input label="אימייל" name="email" type="email" dir="auto" placeholder="example@email.com" required />
                   <div>
-                    <label className="block text-sm font-medium text-sand-700 mb-1.5">
-                      נושא
-                    </label>
-                    <select
-                      name="subject"
-                      className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900
-                        focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors"
-                      required
-                    >
+                    <label className="block text-sm font-medium text-sand-700 mb-1.5">נושא</label>
+                    <select name="subject" className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors" required>
                       <option value="">בחרו נושא</option>
                       <option value="admissions">הרשמה</option>
                       <option value="visit">ביקור בבית הספר</option>
@@ -92,18 +137,8 @@ export default function ContactPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-sand-700 mb-1.5">
-                      הודעה
-                    </label>
-                    <textarea
-                      name="message"
-                      rows={5}
-                      className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900
-                        placeholder:text-sand-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
-                        outline-none transition-colors resize-none"
-                      placeholder="כתבו את הודעתכם כאן..."
-                      required
-                    />
+                    <label className="block text-sm font-medium text-sand-700 mb-1.5">הודעה</label>
+                    <textarea name="message" rows={5} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 placeholder:text-sand-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-none" placeholder="כתבו את הודעתכם כאן..." required />
                   </div>
                   <Button type="submit" size="lg" disabled={isSubmitting}>
                     {isSubmitting ? "שולח..." : "שליחה"}
@@ -116,57 +151,9 @@ export default function ContactPage() {
             <div>
               <h2 className="text-2xl font-bold text-sand-900 mb-6">פרטי התקשרות</h2>
               <div className="space-y-4 mb-8">
-                {[
-                  {
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    ),
-                    label: "כתובת",
-                    value: "זכרון יעקב, ישראל",
-                    color: RAINBOW_COLORS[0],
-                  },
-                  {
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                    ),
-                    label: "טלפון",
-                    value: "04-XXX-XXXX",
-                    color: RAINBOW_COLORS[3],
-                  },
-                  {
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    ),
-                    label: "אימייל",
-                    value: "info@keshet-school.co.il",
-                    color: RAINBOW_COLORS[4],
-                  },
-                  {
-                    icon: (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    ),
-                    label: "שעות פעילות",
-                    value: "ראשון-חמישי 07:30-16:00",
-                    color: RAINBOW_COLORS[6],
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-sand-200"
-                  >
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-white"
-                      style={{ backgroundColor: item.color }}
-                    >
+                {contactItems.map((item) => (
+                  <div key={item.label} className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-sm border border-sand-200">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: item.color }}>
                       {item.icon}
                     </div>
                     <div>

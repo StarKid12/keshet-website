@@ -47,21 +47,40 @@ const highlights = [
   },
 ];
 
-export function HighlightsGrid() {
+interface HighlightsGridProps {
+  content?: {
+    heading?: string;
+    subheading?: string;
+    items?: Array<{ title: string; description: string; image_url: string; href: string }>;
+  };
+}
+
+export function HighlightsGrid({ content }: HighlightsGridProps = {}) {
+  const heading = content?.heading ?? "מה מחכה לכם בקשת";
+  const subheading = content?.subheading ?? "מסלולי לימוד מגוונים וחיי קהילה עשירים מגן ועד י\"ב";
+  const displayHighlights = content?.items
+    ? content.items.map((item, i) => ({
+        title: item.title,
+        description: item.description,
+        image: item.image_url,
+        href: item.href,
+        color: RAINBOW_COLORS[i % RAINBOW_COLORS.length],
+      }))
+    : highlights;
   return (
     <section className="py-20">
       <Container>
         <div className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold text-sand-900 mb-4">
-            מה מחכה לכם בקשת
+            {heading}
           </h2>
           <p className="text-lg text-sand-600 max-w-2xl mx-auto">
-            מסלולי לימוד מגוונים וחיי קהילה עשירים מגן ועד י&quot;ב
+            {subheading}
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {highlights.map((item) => (
+          {displayHighlights.map((item) => (
             <Link
               key={item.title}
               href={item.href}

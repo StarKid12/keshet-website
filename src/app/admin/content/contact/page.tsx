@@ -1,0 +1,166 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/Input";
+import { ContentSection } from "@/components/admin/ContentSection";
+import { SaveButton } from "@/components/admin/SaveButton";
+import Link from "next/link";
+import type { ContactInfo } from "@/lib/types/cms";
+
+const defaultContact: ContactInfo = {
+  address: "זכרון יעקב, ישראל",
+  phone: "04-XXX-XXXX",
+  email: "info@keshet-school.co.il",
+  hours: "ראשון-חמישי 07:30-16:00",
+  fax: "",
+  social: { facebook: "", instagram: "" },
+};
+
+export default function ContactContentPage() {
+  const [contact, setContact] = useState<ContactInfo>(defaultContact);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchContent();
+  }, []);
+
+  async function fetchContent() {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("site_content")
+      .select("content")
+      .eq("page", "global")
+      .eq("section", "contact_info")
+      .single();
+
+    if (data?.content) {
+      setContact({ ...defaultContact, ...(data.content as ContactInfo) });
+    }
+    setLoading(false);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setSuccess(null);
+    const supabase = createClient();
+
+    const { error } = await supabase.from("site_content").upsert(
+      {
+        page: "global",
+        section: "contact_info",
+        content: contact,
+      },
+      { onConflict: "page,section" }
+    );
+
+    if (!error) {
+      await fetch("/api/revalidate", { method: "POST" });
+      setSuccess("נשמר בהצלחה!");
+      setTimeout(() => setSuccess(null), 3000);
+    }
+    setSaving(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="animate-pulse bg-sand-200 rounded-xl h-16" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-8">
+        <Link
+          href="/admin/content"
+          className="w-8 h-8 rounded-lg bg-sand-100 flex items-center justify-center hover:bg-sand-200 transition-colors"
+        >
+          <svg className="w-4 h-4 text-sand-600 -scale-x-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </Link>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-sand-900">
+            פרטי קשר
+          </h1>
+          <p className="text-sand-500 mt-0.5 text-sm">
+            פרטים שמופיעים בדף צור קשר ובתחתית האתר
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-4 max-w-2xl">
+        <ContentSection title="פרטי התקשרות">
+          <Input
+            label="כתובת"
+            value={contact.address}
+            onChange={(e) => setContact({ ...contact, address: e.target.value })}
+            placeholder="כתובת מלאה"
+          />
+          <Input
+            label="טלפון"
+            value={contact.phone}
+            onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+            placeholder="04-XXX-XXXX"
+            dir="ltr"
+          />
+          <Input
+            label="אימייל"
+            value={contact.email}
+            onChange={(e) => setContact({ ...contact, email: e.target.value })}
+            placeholder="info@keshet-school.co.il"
+            dir="ltr"
+          />
+          <Input
+            label="שעות פעילות"
+            value={contact.hours}
+            onChange={(e) => setContact({ ...contact, hours: e.target.value })}
+            placeholder="ראשון-חמישי 07:30-16:00"
+          />
+          <Input
+            label="פקס"
+            value={contact.fax || ""}
+            onChange={(e) => setContact({ ...contact, fax: e.target.value })}
+            placeholder="מספר פקס (אופציונלי)"
+            dir="ltr"
+          />
+        </ContentSection>
+
+        <ContentSection title="רשתות חברתיות" defaultOpen={false}>
+          <Input
+            label="פייסבוק"
+            value={contact.social?.facebook || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, facebook: e.target.value },
+              })
+            }
+            placeholder="https://facebook.com/..."
+            dir="ltr"
+          />
+          <Input
+            label="אינסטגרם"
+            value={contact.social?.instagram || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, instagram: e.target.value },
+              })
+            }
+            placeholder="https://instagram.com/..."
+            dir="ltr"
+          />
+        </ContentSection>
+
+        <SaveButton saving={saving} onClick={handleSave} successMessage={success} />
+      </div>
+    </div>
+  );
+}

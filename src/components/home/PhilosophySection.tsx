@@ -37,21 +37,42 @@ const values = [
   },
 ];
 
-export function PhilosophySection() {
+interface PhilosophySectionProps {
+  content?: {
+    heading?: string;
+    subheading?: string;
+    pillars?: Array<{ title: string; description: string }>;
+  };
+}
+
+export function PhilosophySection({ content }: PhilosophySectionProps = {}) {
+  const heading = content?.heading ?? "חינוך דמוקרטי יהודי-פלורליסטי";
+  const subheading = content?.subheading ?? "שלושת העמודים שעליהם נבנה בית הספר שלנו";
+  const pillars = content?.pillars;
+
+  // If CMS pillars are provided, merge descriptions with existing icons/colors
+  const displayValues = pillars
+    ? pillars.map((p, i) => ({
+        ...values[i % values.length],
+        title: p.title,
+        description: p.description,
+      }))
+    : values;
+
   return (
     <section className="py-20 bg-sand-50">
       <Container>
         <div className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold text-sand-900 mb-4">
-            חינוך דמוקרטי יהודי-פלורליסטי
+            {heading}
           </h2>
           <p className="text-lg text-sand-600 max-w-2xl mx-auto">
-            שלושת העמודים שעליהם נבנה בית הספר שלנו
+            {subheading}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {values.map((value) => (
+          {displayValues.map((value) => (
             <div
               key={value.title}
               className="bg-white rounded-2xl p-8 shadow-sm border border-sand-200

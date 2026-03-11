@@ -39,7 +39,23 @@ const testimonials = [
   },
 ];
 
-export function TestimonialCarousel() {
+interface TestimonialCarouselProps {
+  content?: {
+    heading?: string;
+    subheading?: string;
+    items?: Array<{ quote: string; author: string; role: string }>;
+  };
+}
+
+export function TestimonialCarousel({ content }: TestimonialCarouselProps = {}) {
+  const heading = content?.heading ?? "מה אומרים עלינו";
+  const subheading = content?.subheading ?? "קולות מהקהילה שלנו";
+  const displayTestimonials = content?.items
+    ? content.items.map((item, i) => ({
+        ...item,
+        color: RAINBOW_COLORS[i % RAINBOW_COLORS.length],
+      }))
+    : testimonials;
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, direction: "rtl", align: "center" },
     [Autoplay({ delay: 4000, stopOnInteraction: true })]
@@ -62,16 +78,16 @@ export function TestimonialCarousel() {
       <Container>
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-sand-900 mb-4">
-            מה אומרים עלינו
+            {heading}
           </h2>
           <p className="text-lg text-sand-600">
-            קולות מהקהילה שלנו
+            {subheading}
           </p>
         </div>
 
         <div ref={emblaRef} className="overflow-hidden">
           <div className="flex">
-            {testimonials.map((testimonial, index) => (
+            {displayTestimonials.map((testimonial, index) => (
               <div
                 key={index}
                 className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.33%] px-4"
@@ -101,7 +117,7 @@ export function TestimonialCarousel() {
 
         {/* Dots */}
         <div className="flex justify-center gap-2 mt-8">
-          {testimonials.map((_, index) => (
+          {displayTestimonials.map((_, index) => (
             <button
               key={index}
               onClick={() => emblaApi?.scrollTo(index)}

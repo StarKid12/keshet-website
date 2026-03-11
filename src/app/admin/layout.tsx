@@ -12,6 +12,7 @@ const adminNav = [
   { label: "סקירה כללית", href: "/admin", icon: "📊", color: RAINBOW_COLORS[0] },
   { label: "משתמשים", href: "/admin/users", icon: "👥", color: RAINBOW_COLORS[1] },
   { label: "מיילים מאושרים", href: "/admin/approved-emails", icon: "📧", color: RAINBOW_COLORS[2] },
+  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[5] },
   { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[3] },
   { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[4] },
   { label: "הודעות", href: "/admin/messages", icon: "📢", color: RAINBOW_COLORS[6] },
@@ -98,7 +99,9 @@ export default function AdminLayout({
         {/* Nav */}
         <nav className="flex-1 py-2 overflow-y-auto">
           {adminNav.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -166,7 +169,9 @@ export default function AdminLayout({
         </div>
         <nav className="flex-1 py-2 overflow-y-auto">
           {adminNav.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
