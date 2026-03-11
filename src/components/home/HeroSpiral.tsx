@@ -37,7 +37,7 @@ export function HeroSpiral() {
         opacity: 1,
       });
       gsap.set(logo, { opacity: 0, scale: 0.7, y: 60 });
-      gsap.set(cta, { opacity: 0, y: 40 });
+      gsap.set(cta, { opacity: 0, y: 40, pointerEvents: "none" });
       words.forEach((w) => gsap.set(w, { opacity: 0 }));
       if (firstWord) gsap.set(firstWord, { opacity: 1 });
 
@@ -97,6 +97,7 @@ export function HeroSpiral() {
         {
           opacity: 1,
           y: 0,
+          pointerEvents: "auto",
           duration: 0.15,
           ease: "power2.out",
         },
