@@ -22,7 +22,7 @@ export default function AboutPage() {
         <Container>
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl font-bold text-sand-900 mb-6">
-              אודות <img src="/images/logo.png" alt="קשת" className="inline h-12 sm:h-14" />
+              אודות <img src="/images/logo.png" alt="קשת" className="inline h-16 sm:h-20" style={{ verticalAlign: "middle", marginTop: "-0.15em" }} />
             </h1>
             <p className="text-xl text-sand-600 leading-relaxed">
               בית הספר הדמוקרטי יהודי-פלורליסטי קשת בזכרון יעקב הוא מוסד חינוכי ייחודי,

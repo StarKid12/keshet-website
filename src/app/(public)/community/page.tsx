@@ -54,7 +54,7 @@ export default function CommunityPage() {
         <Container>
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl font-bold text-sand-900 mb-6">
-              חיים ב<img src="/images/logo.png" alt="קשת" className="inline h-12 sm:h-14" />
+              חיים ב<img src="/images/logo.png" alt="קשת" className="inline h-16 sm:h-20" style={{ verticalAlign: "middle", marginTop: "-0.15em" }} />
             </h1>
             <p className="text-xl text-sand-600 leading-relaxed">
               בית הספר הוא הרבה יותר מכיתות ולימודים. זו קהילה חמה, מגוונת ופעילה
