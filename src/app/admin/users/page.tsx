@@ -53,6 +53,21 @@ export default function AdminUsersPage() {
     );
   }
 
+  async function deleteUser(userId: string) {
+    if (!confirm("למחוק את המשתמש לצמיתות? פעולה זו לא ניתנת לביטול.")) return;
+    const res = await fetch("/api/admin/delete-user", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    });
+    if (res.ok) {
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } else {
+      const data = await res.json();
+      alert(data.error || "שגיאה במחיקת המשתמש");
+    }
+  }
+
   const filteredUsers = users.filter((u) => {
     if (filter === "pending") return !u.is_approved;
     if (filter === "approved") return u.is_approved;
@@ -158,14 +173,25 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      {!user.is_approved && (
-                        <Button
-                          size="sm"
-                          onClick={() => approveUser(user.id)}
+                      <div className="flex items-center gap-2">
+                        {!user.is_approved && (
+                          <Button
+                            size="sm"
+                            onClick={() => approveUser(user.id)}
+                          >
+                            אישור
+                          </Button>
+                        )}
+                        <button
+                          onClick={() => deleteUser(user.id)}
+                          className="p-2 rounded-lg hover:bg-rainbow-red/10 transition-colors text-sand-400 hover:text-rainbow-red"
+                          title="מחיקת משתמש"
                         >
-                          אישור
-                        </Button>
-                      )}
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
