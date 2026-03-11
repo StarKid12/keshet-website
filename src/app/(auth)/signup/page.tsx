@@ -48,7 +48,7 @@ export default function SignupPage() {
       if (error.message === "User already registered") {
         setError("כתובת האימייל כבר רשומה במערכת");
       } else if (error.message.includes("Database error")) {
-        setError("שגיאת מסד נתונים. ייתכן שהסכמה טרם הוגדרה.");
+        setError(`שגיאת מסד נתונים: ${error.message}`);
       } else {
         setError(`שגיאה: ${error.message}`);
       }
