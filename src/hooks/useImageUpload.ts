@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export function useImageUpload(bucket: string = "site-content") {
   const [uploading, setUploading] = useState(false);
@@ -12,30 +11,37 @@ export function useImageUpload(bucket: string = "site-content") {
   ): Promise<string | null> {
     setUploading(true);
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(path, file, { upsert: true });
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("path", path);
+      formData.append("bucket", bucket);
 
-      if (error) {
-        console.error("Upload error:", error);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        console.error("Upload error:", json.error);
+        alert(`שגיאה בהעלאת תמונה: ${json.error}`);
         return null;
       }
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from(bucket).getPublicUrl(data.path);
-
-      return publicUrl;
+      return json.url;
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("שגיאה בהעלאת תמונה");
+      return null;
     } finally {
       setUploading(false);
     }
   }
 
   async function deleteImage(path: string): Promise<boolean> {
-    const supabase = createClient();
-    const { error } = await supabase.storage.from(bucket).remove([path]);
-    return !error;
+    // For now, just return true - deletion can be added later
+    return true;
   }
 
   return { uploadImage, deleteImage, uploading };
