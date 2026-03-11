@@ -1,15 +1,27 @@
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
-// Placeholder blog post detail page
-// In production, this would fetch from Supabase
 export default async function BlogPostPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const supabase = await createClient();
+
+  const { data: post } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+
+  if (!post) {
+    notFound();
+  }
 
   return (
     <>
@@ -22,28 +34,34 @@ export default async function BlogPostPage({
             חזרה לבלוג
           </Link>
 
+          {post.cover_image_url && (
+            <img
+              src={post.cover_image_url}
+              alt={post.title}
+              className="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8"
+            />
+          )}
+
           <header className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-sand-900 mb-4">
-              {slug.replace(/-/g, " ")}
+              {post.title}
             </h1>
-            <div className="flex items-center gap-3 text-sand-500">
-              <time>תאריך פרסום</time>
-              <span>·</span>
-              <span>צוות קשת</span>
-            </div>
+            {post.published_at && (
+              <time className="text-sand-500">
+                {new Date(post.published_at).toLocaleDateString("he-IL", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </time>
+            )}
           </header>
 
           <div className="rainbow-divider rounded-full mb-8" />
 
-          <div className="prose prose-lg max-w-none text-sand-700 leading-relaxed">
-            <p>
-              תוכן הכתבה יוצג כאן. בשלב זה, עמוד הבלוג מציג תוכן לדוגמה.
-              בגרסה הסופית, התוכן ייטען מבסיס הנתונים (Supabase).
-            </p>
-            <p>
-              הכתבות נכתבות על ידי תלמידים וצוות בית הספר קשת, ומספרות על
-              אירועים, פעילויות ורגעים מיוחדים בחיי בית הספר.
-            </p>
+          <div className="prose prose-lg max-w-none text-sand-700 leading-relaxed whitespace-pre-wrap">
+            {post.content}
           </div>
 
           <div className="mt-12 pt-8 border-t border-sand-200">
