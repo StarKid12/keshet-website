@@ -114,6 +114,7 @@ export default function AdminBlogPage() {
           )
         );
         resetForm();
+        await fetch("/api/revalidate", { method: "POST" });
       }
     } else {
       const { data, error } = await supabase
@@ -133,6 +134,7 @@ export default function AdminBlogPage() {
       if (!error && data) {
         setPosts((prev) => [data, ...prev]);
         resetForm();
+        await fetch("/api/revalidate", { method: "POST" });
       }
     }
     setSaving(false);
@@ -143,6 +145,7 @@ export default function AdminBlogPage() {
     const supabase = createClient();
     await supabase.from("blog_posts").delete().eq("id", id);
     setPosts((prev) => prev.filter((p) => p.id !== id));
+    await fetch("/api/revalidate", { method: "POST" });
   }
 
   async function togglePublished(post: BlogPost) {
@@ -157,6 +160,7 @@ export default function AdminBlogPage() {
         p.id === post.id ? { ...p, is_published: newPublished } : p
       )
     );
+    await fetch("/api/revalidate", { method: "POST" });
   }
 
   return (
