@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/Input";
 import { ContentSection } from "@/components/admin/ContentSection";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { SaveButton } from "@/components/admin/SaveButton";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import Link from "next/link";
 
 export default function CommunityContentPage() {
   const { sections, loading, saving, success, saveAllSections } =
     useSiteContent("community");
+  const { uploadImage, uploading } = useImageUpload();
 
   const [hero, setHero] = useState({
     title: "חיים בקשת",
@@ -92,7 +95,16 @@ export default function CommunityContentPage() {
                   <label className="block text-sm font-medium text-sand-700 mb-1.5">תיאור</label>
                   <textarea value={item.description} onChange={(e) => onChange({ ...item, description: e.target.value })} rows={2} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y" />
                 </div>
-                <Input label="כתובת תמונה" value={item.image_url} onChange={(e) => onChange({ ...item, image_url: e.target.value })} dir="ltr" />
+                <ImageUploader
+                  currentUrl={item.image_url || null}
+                  onUpload={async (file) => {
+                    const url = await uploadImage(file, `community/${item.title || "event"}-${Date.now()}.${file.name.split(".").pop()}`);
+                    if (url) onChange({ ...item, image_url: url });
+                  }}
+                  onRemove={() => onChange({ ...item, image_url: "" })}
+                  uploading={uploading}
+                  label="תמונה"
+                />
               </div>
             )}
           />

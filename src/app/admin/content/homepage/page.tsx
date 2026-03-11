@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/Input";
 import { ContentSection } from "@/components/admin/ContentSection";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { SaveButton } from "@/components/admin/SaveButton";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import Link from "next/link";
 
 export default function HomepageContentPage() {
   const { sections, loading, saving, success, getSection, saveAllSections } =
     useSiteContent("homepage");
+  const { uploadImage, uploading } = useImageUpload();
 
   const [hero, setHero] = useState({
     title: "בית הספר הדמוקרטי יהודי-פלורליסטי",
@@ -43,6 +46,19 @@ export default function HomepageContentPage() {
     ],
   });
 
+  const [highlights, setHighlights] = useState({
+    heading: "מה מחכה לכם בקשת",
+    subheading: "מסלולי לימוד מגוונים וחיי קהילה עשירים מגן ועד י\"ב",
+    items: [
+      { title: "בית צעירים", description: "סביבה מטפחת ומעשירה לגילאי הגן, עם דגש על למידה דרך משחק וחוויה.", image_url: "https://images.unsplash.com/photo-1587654780291-39c9404d7dd0?w=600&q=80", href: "/academics" },
+      { title: "חממה", description: "חינוך יסודי שמשלב לימודים אקדמיים עם ערכים דמוקרטיים ויהודיים-פלורליסטיים.", image_url: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&q=80", href: "/academics" },
+      { title: "שכב\"ג", description: "שנות המעבר - ליווי אישי, העצמה ופיתוח חשיבה עצמאית ואחראית.", image_url: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80", href: "/academics" },
+      { title: "תיכון", description: "הכנה לבגרות ולחיים. העמקה אקדמית, מנהיגות ומעורבות קהילתית.", image_url: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=600&q=80", href: "/academics" },
+      { title: "חיי קהילה", description: "אירועים, חגים, טיולים ופעילויות שמחזקות את הקשר בין תלמידים, מורים ומשפחות.", image_url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80", href: "/community" },
+      { title: "כנסת קשת", description: "מערכת הממשל הדמוקרטית של בית הספר. כאן התלמידים מחליטים, מציעים ומשפיעים.", image_url: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?w=600&q=80", href: "/about" },
+    ],
+  });
+
   const [cta, setCta] = useState({
     heading: "רוצים לשמוע עוד?",
     description: "בואו להכיר את קשת מקרוב. אנחנו מזמינים אתכם לביקור בבית הספר ולשיחה אישית.",
@@ -56,6 +72,7 @@ export default function HomepageContentPage() {
     if (!loading && sections) {
       if (sections.hero) setHero((prev) => ({ ...prev, ...sections.hero }));
       if (sections.philosophy) setPhilosophy((prev) => ({ ...prev, ...sections.philosophy }));
+      if (sections.highlights) setHighlights((prev) => ({ ...prev, ...sections.highlights }));
       if (sections.testimonials) setTestimonials((prev) => ({ ...prev, ...sections.testimonials }));
       if (sections.cta) setCta((prev) => ({ ...prev, ...sections.cta }));
     }
@@ -65,6 +82,7 @@ export default function HomepageContentPage() {
     await saveAllSections({
       hero,
       philosophy,
+      highlights,
       testimonials,
       cta,
     });
@@ -143,6 +161,45 @@ export default function HomepageContentPage() {
                     className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 placeholder:text-sand-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y"
                   />
                 </div>
+              </div>
+            )}
+          />
+        </ContentSection>
+
+        {/* Highlights */}
+        <ContentSection title="מה מחכה לכם (כרטיסיות)">
+          <Input label="כותרת" value={highlights.heading} onChange={(e) => setHighlights({ ...highlights, heading: e.target.value })} />
+          <Input label="תת-כותרת" value={highlights.subheading} onChange={(e) => setHighlights({ ...highlights, subheading: e.target.value })} />
+          <ListEditor
+            items={highlights.items}
+            onChange={(items) => setHighlights({ ...highlights, items })}
+            createNew={() => ({ title: "", description: "", image_url: "", href: "/academics" })}
+            addLabel="כרטיסיה חדשה"
+            renderItem={(item, _, onChange) => (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label="כותרת" value={item.title} onChange={(e) => onChange({ ...item, title: e.target.value })} />
+                  <Input label="קישור" value={item.href} onChange={(e) => onChange({ ...item, href: e.target.value })} dir="ltr" placeholder="/academics" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-sand-700 mb-1.5">תיאור</label>
+                  <textarea
+                    value={item.description}
+                    onChange={(e) => onChange({ ...item, description: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 placeholder:text-sand-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y"
+                  />
+                </div>
+                <ImageUploader
+                  currentUrl={item.image_url || null}
+                  onUpload={async (file) => {
+                    const url = await uploadImage(file, `homepage/${item.title || "highlight"}-${Date.now()}.${file.name.split(".").pop()}`);
+                    if (url) onChange({ ...item, image_url: url });
+                  }}
+                  onRemove={() => onChange({ ...item, image_url: "" })}
+                  uploading={uploading}
+                  label="תמונה"
+                />
               </div>
             )}
           />

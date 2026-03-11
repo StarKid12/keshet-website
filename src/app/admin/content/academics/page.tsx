@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/Input";
 import { ContentSection } from "@/components/admin/ContentSection";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { SaveButton } from "@/components/admin/SaveButton";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import Link from "next/link";
 
 export default function AcademicsContentPage() {
   const { sections, loading, saving, success, saveAllSections } =
     useSiteContent("academics");
+  const { uploadImage, uploading } = useImageUpload();
 
   const [hero, setHero] = useState({
     title: "לימודים בקשת",
@@ -107,7 +110,16 @@ export default function AcademicsContentPage() {
                   <textarea value={item.description} onChange={(e) => onChange({ ...item, description: e.target.value })} rows={2} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y" />
                 </div>
                 <Input label="דגשים (מופרדים בפסיקים)" value={item.highlights.join(", ")} onChange={(e) => onChange({ ...item, highlights: e.target.value.split(",").map((h) => h.trim()).filter(Boolean) })} />
-                <Input label="כתובת תמונה" value={item.image_url} onChange={(e) => onChange({ ...item, image_url: e.target.value })} dir="ltr" />
+                <ImageUploader
+                  currentUrl={item.image_url || null}
+                  onUpload={async (file) => {
+                    const url = await uploadImage(file, `academics/${item.title || "program"}-${Date.now()}.${file.name.split(".").pop()}`);
+                    if (url) onChange({ ...item, image_url: url });
+                  }}
+                  onRemove={() => onChange({ ...item, image_url: "" })}
+                  uploading={uploading}
+                  label="תמונה"
+                />
               </div>
             )}
           />

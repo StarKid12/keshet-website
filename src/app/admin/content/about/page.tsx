@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/Input";
 import { ContentSection } from "@/components/admin/ContentSection";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { SaveButton } from "@/components/admin/SaveButton";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import Link from "next/link";
 
 export default function AboutContentPage() {
   const { sections, loading, saving, success, saveAllSections } =
     useSiteContent("about");
+  const { uploadImage, uploading } = useImageUpload();
 
   const [hero, setHero] = useState({
     title: "אודות",
@@ -127,7 +130,16 @@ export default function AboutContentPage() {
 
         <ContentSection title="החזון">
           <Input label="כותרת" value={vision.heading} onChange={(e) => setVision({ ...vision, heading: e.target.value })} />
-          <Input label="כתובת תמונה" value={vision.image_url || ""} onChange={(e) => setVision({ ...vision, image_url: e.target.value })} dir="ltr" placeholder="URL של תמונה" />
+          <ImageUploader
+            currentUrl={vision.image_url || null}
+            onUpload={async (file) => {
+              const url = await uploadImage(file, `about/vision-${Date.now()}.${file.name.split(".").pop()}`);
+              if (url) setVision({ ...vision, image_url: url });
+            }}
+            onRemove={() => setVision({ ...vision, image_url: "" })}
+            uploading={uploading}
+            label="תמונת החזון"
+          />
           {vision.paragraphs.map((p, i) => (
             <div key={i}>
               <label className="block text-sm font-medium text-sand-700 mb-1.5">פסקה {i + 1}</label>
@@ -166,7 +178,16 @@ export default function AboutContentPage() {
 
         <ContentSection title="הגישה הדמוקרטית" defaultOpen={false}>
           <Input label="כותרת" value={democracy.heading} onChange={(e) => setDemocracy({ ...democracy, heading: e.target.value })} />
-          <Input label="כתובת תמונה" value={democracy.image_url || ""} onChange={(e) => setDemocracy({ ...democracy, image_url: e.target.value })} dir="ltr" />
+          <ImageUploader
+            currentUrl={democracy.image_url || null}
+            onUpload={async (file) => {
+              const url = await uploadImage(file, `about/democracy-${Date.now()}.${file.name.split(".").pop()}`);
+              if (url) setDemocracy({ ...democracy, image_url: url });
+            }}
+            onRemove={() => setDemocracy({ ...democracy, image_url: "" })}
+            uploading={uploading}
+            label="תמונת הדמוקרטיה"
+          />
           {democracy.paragraphs.map((p, i) => (
             <div key={i}>
               <label className="block text-sm font-medium text-sand-700 mb-1.5">פסקה {i + 1}</label>
