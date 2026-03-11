@@ -2,35 +2,47 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { RAINBOW_COLORS } from "@/lib/constants";
+import { createClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
-const placeholderPosts = [
-  {
-    slug: "purim-2019",
-    title: "פורים מגיע לקשת!",
-    excerpt: "ההכנות לחג הפורים בעיצומן. תלמידי קשת מתכוננים עם תחפושות, הצגות ופעילויות יצירתיות.",
-    date: "25 בפברואר 2019",
-    image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600&q=80",
-    color: RAINBOW_COLORS[0],
-  },
-  {
-    slug: "hebrew-language-day",
-    title: "יום השפה העברית",
-    excerpt: "חגגנו את יום השפה העברית עם חדרי בריחה, תחנות כושר ותחרות עיצוב עוגיות.",
-    date: "10 בינואר 2019",
-    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&q=80",
-    color: RAINBOW_COLORS[3],
-  },
-  {
-    slug: "kfar-rimon",
-    title: "כפר רימון",
-    excerpt: "שוק בית ספרי מרהיב עם דוכנים שנוהלו על ידי התלמידים, הופעות ואוכל.",
-    date: "13 בדצמבר 2018",
-    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=80",
-    color: RAINBOW_COLORS[5],
-  },
-];
+const getLatestPosts = unstable_cache(
+  async () => {
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("slug, title, excerpt, published_at, cover_image_url")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(3);
 
-export function NewsPreview() {
+      if (error) return [];
+      return data || [];
+    } catch {
+      return [];
+    }
+  },
+  ["latest-posts"],
+  { revalidate: 300, tags: ["cms"] }
+);
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("he-IL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+export async function NewsPreview() {
+  const posts = await getLatestPosts();
+
+  if (posts.length === 0) return null;
+
   return (
     <section className="py-20 bg-sand-50">
       <Container>
@@ -54,32 +66,43 @@ export function NewsPreview() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {placeholderPosts.map((post) => (
+          {posts.map((post, index) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
               className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-sand-200
                 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="overflow-hidden">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+              {post.cover_image_url ? (
+                <div className="overflow-hidden">
+                  <img
+                    src={post.cover_image_url}
+                    alt={post.title}
+                    className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-full h-48"
+                  style={{ backgroundColor: RAINBOW_COLORS[index % RAINBOW_COLORS.length] + "20" }}
                 />
-              </div>
+              )}
               <div
                 className="h-1 w-full"
-                style={{ backgroundColor: post.color }}
+                style={{ backgroundColor: RAINBOW_COLORS[index % RAINBOW_COLORS.length] }}
               />
               <div className="p-6">
-                <time className="text-sm text-sand-500">{post.date}</time>
+                <time className="text-sm text-sand-500">
+                  {post.published_at ? formatDate(post.published_at) : ""}
+                </time>
                 <h3 className="text-lg font-bold text-sand-900 mt-1 mb-2 group-hover:text-primary-700 transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-sand-600 text-sm leading-relaxed">
-                  {post.excerpt}
-                </p>
+                {post.excerpt && (
+                  <p className="text-sand-600 text-sm leading-relaxed">
+                    {post.excerpt}
+                  </p>
+                )}
               </div>
             </Link>
           ))}
