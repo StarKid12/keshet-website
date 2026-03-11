@@ -22,15 +22,23 @@ export default function ContactPage() {
 
   useEffect(() => {
     async function fetchContact() {
-      const supabase = createClient();
-      const { data } = await supabase
-        .from("site_content")
-        .select("content")
-        .eq("page", "global")
-        .eq("section", "contact_info")
-        .single();
-      if (data?.content) {
-        setContact({ ...defaultContact, ...(data.content as ContactInfo) });
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("site_content")
+          .select("content")
+          .eq("page", "global")
+          .eq("section", "contact_info")
+          .single();
+        if (error) {
+          console.error("Failed to fetch contact info:", error.message);
+          return;
+        }
+        if (data?.content) {
+          setContact({ ...defaultContact, ...(data.content as ContactInfo) });
+        }
+      } catch (err) {
+        console.error("Contact fetch error:", err);
       }
     }
     fetchContact();
