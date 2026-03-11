@@ -44,9 +44,14 @@ export default function SignupPage() {
     });
 
     if (error) {
-      setError(error.message === "User already registered"
-        ? "כתובת האימייל כבר רשומה במערכת"
-        : "אירעה שגיאה. נסו שוב.");
+      console.error("Signup error:", error.message, error);
+      if (error.message === "User already registered") {
+        setError("כתובת האימייל כבר רשומה במערכת");
+      } else if (error.message.includes("Database error")) {
+        setError("שגיאת מסד נתונים. ייתכן שהסכמה טרם הוגדרה.");
+      } else {
+        setError(`שגיאה: ${error.message}`);
+      }
       setIsLoading(false);
       return;
     }
