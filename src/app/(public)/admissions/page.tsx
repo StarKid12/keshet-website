@@ -50,7 +50,7 @@ export default function AdmissionsPage() {
         <Container>
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl font-bold text-sand-900 mb-6">
-              הצטרפו ל<span className="rainbow-gradient bg-clip-text text-transparent">קשת</span>
+              הצטרפו ל<img src="/images/logo.png" alt="קשת" className="inline h-12 sm:h-14" />
             </h1>
             <p className="text-xl text-sand-600 leading-relaxed">
               אנחנו שמחים שאתם מתעניינים בקשת! הנה כל מה שצריך לדעת על תהליך ההרשמה.
@@ -88,7 +88,7 @@ export default function AdmissionsPage() {
       <section className="py-16 bg-sand-50">
         <Container size="md">
           <div className="bg-white rounded-2xl shadow-lg border border-sand-200 p-8 sm:p-12 text-center">
-            <div className="rainbow-gradient bg-clip-text text-transparent text-sm font-bold mb-3 tracking-wider">
+            <div className="text-sm font-bold mb-3 tracking-wider text-primary-600">
               יום פתוח
             </div>
             <h2 className="text-3xl font-bold text-sand-900 mb-4">

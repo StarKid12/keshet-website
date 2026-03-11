@@ -70,9 +70,7 @@ export function HeroCarousel() {
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center text-white px-4 max-w-4xl">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-4 leading-tight">
-            <span className="rainbow-gradient bg-clip-text text-transparent">
-              קשת
-            </span>
+            <img src="/images/logo.png" alt="קשת" className="inline h-16 sm:h-20 lg:h-24" />
           </h1>
           <p className="text-xl sm:text-2xl lg:text-3xl font-light mb-3 text-white/90">
             בית הספר הדמוקרטי יהודי-פלורליסטי
