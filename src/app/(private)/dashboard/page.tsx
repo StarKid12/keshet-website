@@ -12,7 +12,7 @@ const quickLinks = [
 ];
 
 export default function DashboardPage() {
-  const { profile, loading } = useUser();
+  const { user, profile, loading } = useUser();
 
   if (loading) {
     return (
@@ -55,7 +55,7 @@ export default function DashboardPage() {
         <div className="relative">
           <p className="text-white/80 text-sm mb-1">{greeting}</p>
           <h1 className="text-2xl sm:text-3xl font-bold">
-            {profile?.full_name || "אורח/ת"} 👋
+            {profile?.full_name || user?.user_metadata?.full_name || profile?.email?.split("@")[0] || "אורח/ת"} 👋
           </h1>
           <p className="text-white/70 mt-2 text-sm">ברוכים הבאים לאזור האישי של קשת</p>
         </div>

@@ -21,18 +21,27 @@ export default function PrivateLayout({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - physically on the right */}
       <div
-        className={`fixed inset-y-0 end-0 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
-        }`}
+        className="fixed top-0 bottom-0 z-50 hidden lg:block"
+        style={{ right: 0 }}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      {/* Mobile sidebar - slides from right */}
+      <div
+        className="fixed top-0 bottom-0 z-50 lg:hidden transition-all duration-300"
+        style={{
+          right: sidebarOpen ? 0 : "-16rem",
+        }}
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
       {/* Main content */}
-      <div className="lg:me-64">
-        {/* Top bar with toggle */}
+      <div className="lg:pr-64">
+        {/* Top bar with toggle - mobile only */}
         <div className="sticky top-0 z-30 bg-sand-50/80 backdrop-blur-sm border-b border-sand-200/50 px-4 py-3 flex items-center gap-3 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
