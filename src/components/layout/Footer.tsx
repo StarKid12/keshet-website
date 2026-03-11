@@ -81,6 +81,7 @@ export async function Footer() {
         {/* Copyright */}
         <div className="mt-10 pt-6 border-t border-sand-700 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-sand-500">
           <p>© {new Date().getFullYear()} {SITE_FULL_NAME}. כל הזכויות שמורות.</p>
+          <p>נוצר על ידי מיתר ארן, כיתה ח׳ 2026</p>
           <Link href="/accessibility" className="hover:text-white transition-colors">
             הצהרת נגישות
           </Link>
