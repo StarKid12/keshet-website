@@ -43,7 +43,11 @@ const navColors = [
   RAINBOW_COLORS[6], // chat - violet
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useUser();
@@ -55,8 +59,12 @@ export function Sidebar() {
     router.refresh();
   }
 
+  function handleNavClick() {
+    onClose?.();
+  }
+
   return (
-    <aside className="w-64 h-screen sticky top-0 flex flex-col bg-gradient-to-b from-sand-800 to-sand-900 text-white">
+    <aside className="w-64 h-screen flex flex-col bg-gradient-to-b from-sand-800 to-sand-900 text-white">
       {/* Rainbow stripe at top */}
       <div className="flex h-1.5 shrink-0">
         {RAINBOW_COLORS.map((color, i) => (
@@ -66,13 +74,24 @@ export function Sidebar() {
 
       {/* Header */}
       <div className="p-5 pb-4">
-        <Link href="/" className="flex items-center gap-3">
-          <img src="/images/logo-circle.png" alt={SITE_NAME} className="h-11 rounded-lg" />
-          <div>
-            <div className="font-bold text-sm">קשת</div>
-            <div className="text-xs text-sand-400">האזור האישי</div>
-          </div>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3" onClick={handleNavClick}>
+            <img src="/images/logo-circle.png" alt={SITE_NAME} className="h-11 rounded-lg" />
+            <div>
+              <div className="font-bold text-sm">קשת</div>
+              <div className="text-xs text-sand-400">האזור האישי</div>
+            </div>
+          </Link>
+          {/* Close button - mobile only */}
+          <button
+            onClick={onClose}
+            className="lg:hidden w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
         {profile && (
           <div className="mt-4 bg-white/10 rounded-xl p-3">
             <p className="text-sm font-medium truncate">
@@ -94,6 +113,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleNavClick}
               className={`flex items-center gap-3 px-5 py-3 mx-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-white/15 shadow-lg"
@@ -123,6 +143,7 @@ export function Sidebar() {
             <div className="mx-5 my-3 border-t border-white/10" />
             <Link
               href="/admin"
+              onClick={handleNavClick}
               className={`flex items-center gap-3 px-5 py-3 mx-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                 pathname.startsWith("/admin")
                   ? "bg-white/15 shadow-lg"

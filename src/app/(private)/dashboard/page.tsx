@@ -35,7 +35,7 @@ export default function DashboardPage() {
   })();
 
   return (
-    <div className="max-w-5xl">
+    <div>
       {/* Welcome Banner */}
       <div
         className="rounded-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden"
