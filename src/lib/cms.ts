@@ -15,21 +15,28 @@ function getCmsClient() {
 /**
  * Fetch all content sections for a given page.
  * Returns a map: { sectionKey: contentObject }
+ * Returns empty object if table doesn't exist yet or query fails.
  */
 export const getPageContent = unstable_cache(
   async (page: string) => {
-    const supabase = getCmsClient();
-    const { data } = await supabase
-      .from("site_content")
-      .select("section, content")
-      .eq("page", page)
-      .order("sort_order");
+    try {
+      const supabase = getCmsClient();
+      const { data, error } = await supabase
+        .from("site_content")
+        .select("section, content")
+        .eq("page", page)
+        .order("sort_order");
 
-    const contentMap: Record<string, Record<string, unknown>> = {};
-    data?.forEach((row: { section: string; content: Record<string, unknown> }) => {
-      contentMap[row.section] = row.content;
-    });
-    return contentMap;
+      if (error) return {};
+
+      const contentMap: Record<string, Record<string, unknown>> = {};
+      data?.forEach((row: { section: string; content: Record<string, unknown> }) => {
+        contentMap[row.section] = row.content;
+      });
+      return contentMap;
+    } catch {
+      return {};
+    }
   },
   ["page-content"],
   { revalidate: 300, tags: ["cms"] }
@@ -40,17 +47,23 @@ export const getPageContent = unstable_cache(
  */
 export const getGlobalContent = unstable_cache(
   async () => {
-    const supabase = getCmsClient();
-    const { data } = await supabase
-      .from("site_content")
-      .select("section, content")
-      .eq("page", "global");
+    try {
+      const supabase = getCmsClient();
+      const { data, error } = await supabase
+        .from("site_content")
+        .select("section, content")
+        .eq("page", "global");
 
-    const contentMap: Record<string, Record<string, unknown>> = {};
-    data?.forEach((row: { section: string; content: Record<string, unknown> }) => {
-      contentMap[row.section] = row.content;
-    });
-    return contentMap;
+      if (error) return {};
+
+      const contentMap: Record<string, Record<string, unknown>> = {};
+      data?.forEach((row: { section: string; content: Record<string, unknown> }) => {
+        contentMap[row.section] = row.content;
+      });
+      return contentMap;
+    } catch {
+      return {};
+    }
   },
   ["global-content"],
   { revalidate: 300, tags: ["cms"] }
@@ -61,13 +74,19 @@ export const getGlobalContent = unstable_cache(
  */
 export const getStaffMembers = unstable_cache(
   async (): Promise<StaffMember[]> => {
-    const supabase = getCmsClient();
-    const { data } = await supabase
-      .from("staff_members")
-      .select("*")
-      .eq("is_visible", true)
-      .order("sort_order");
-    return (data as StaffMember[]) || [];
+    try {
+      const supabase = getCmsClient();
+      const { data, error } = await supabase
+        .from("staff_members")
+        .select("*")
+        .eq("is_visible", true)
+        .order("sort_order");
+
+      if (error) return [];
+      return (data as StaffMember[]) || [];
+    } catch {
+      return [];
+    }
   },
   ["staff-members"],
   { revalidate: 300, tags: ["cms"] }
