@@ -258,8 +258,8 @@ export default function StaffContentPage() {
         </div>
       )}
 
-      {/* Staff list */}
-      {loading ? (
+      {/* Staff list - hidden when editing */}
+      {showForm ? null : loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="animate-pulse bg-sand-200 rounded-xl h-20" />
