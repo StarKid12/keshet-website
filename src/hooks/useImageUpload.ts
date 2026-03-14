@@ -11,10 +11,11 @@ export function useImageUpload(bucket: string = "site-content") {
   ): Promise<string | null> {
     setUploading(true);
     try {
-      // Sanitize path: replace non-ASCII chars (e.g. Hebrew) with random string
-      const safePath = path.replace(/[^\x00-\x7F]+/g, () =>
-        Math.random().toString(36).substring(2, 8)
-      );
+      // Build a safe path: keep folder prefix, use timestamp + random for filename
+      const parts = path.split("/");
+      const ext = parts[parts.length - 1].split(".").pop() || "jpg";
+      const folder = parts.slice(0, -1).join("/").replace(/[^a-zA-Z0-9\-_/]/g, "") || "uploads";
+      const safePath = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
 
       const formData = new FormData();
       formData.append("file", file);
