@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/useUser";
 import { RAINBOW_COLORS } from "@/lib/constants";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 interface Message {
   id: string;
@@ -12,6 +14,7 @@ interface Message {
   body: string;
   is_pinned: boolean;
   created_at: string;
+  sender_id: string;
   sender: {
     full_name: string | null;
     role: string;
@@ -19,9 +22,19 @@ interface Message {
 }
 
 export default function MessagesPage() {
-  const { profile } = useUser();
+  const { user, profile } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // New message form state
+  const [newSubject, setNewSubject] = useState("");
+  const [newBody, setNewBody] = useState("");
+  const [newIsPinned, setNewIsPinned] = useState(false);
+
+  const isTeacherOrAdmin = profile?.role === "teacher" || profile?.role === "admin";
 
   useEffect(() => {
     async function fetchMessages() {
@@ -31,7 +44,7 @@ export default function MessagesPage() {
       const { data } = await supabase
         .from("messages")
         .select(`
-          id, type, subject, body, is_pinned, created_at,
+          id, type, subject, body, is_pinned, created_at, sender_id,
           sender:profiles!sender_id(full_name, role)
         `)
         .eq("type", "announcement")
@@ -48,12 +61,130 @@ export default function MessagesPage() {
     }
   }, [profile]);
 
+  async function handleCreateMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user || !profile || !newBody.trim()) return;
+
+    setCreating(true);
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        type: "announcement" as const,
+        subject: newSubject.trim() || null,
+        body: newBody.trim(),
+        is_pinned: newIsPinned,
+        sender_id: user.id,
+        class_id: profile.role === "admin" ? null : profile.class_id,
+      })
+      .select(`
+        id, type, subject, body, is_pinned, created_at, sender_id,
+        sender:profiles!sender_id(full_name, role)
+      `)
+      .single();
+
+    if (!error && data) {
+      setMessages((prev) => [data as unknown as Message, ...prev]);
+      setNewSubject("");
+      setNewBody("");
+      setNewIsPinned(false);
+      setShowForm(false);
+    }
+
+    setCreating(false);
+  }
+
+  async function handleDeleteMessage(messageId: string) {
+    if (!confirm("האם למחוק את ההודעה?")) return;
+
+    setDeletingId(messageId);
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId);
+
+    if (!error) {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    }
+
+    setDeletingId(null);
+  }
+
+  function canDelete(message: Message): boolean {
+    if (!user || !profile) return false;
+    if (profile.role === "admin") return true;
+    if (profile.role === "teacher" && message.sender_id === user.id) return true;
+    return false;
+  }
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-sand-900">הודעות</h1>
-        <p className="text-sand-500 mt-1">הודעות והכרזות מבית הספר</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-sand-900">הודעות</h1>
+          <p className="text-sand-500 mt-1">הודעות והכרזות מבית הספר</p>
+        </div>
+        {isTeacherOrAdmin && (
+          <Button
+            onClick={() => setShowForm(!showForm)}
+            variant={showForm ? "secondary" : "primary"}
+            size="sm"
+          >
+            {showForm ? "ביטול" : "+ הודעה חדשה"}
+          </Button>
+        )}
       </div>
+
+      {/* New Message Form */}
+      {showForm && isTeacherOrAdmin && (
+        <form
+          onSubmit={handleCreateMessage}
+          className="bg-white rounded-2xl p-6 shadow-sm border border-sand-200 mb-8 space-y-4"
+        >
+          <h2 className="text-lg font-bold text-sand-900">הודעה חדשה</h2>
+          {profile?.role === "admin" && (
+            <p className="text-sm text-sand-500">
+              ההודעה תישלח לכל בית הספר (כמנהל/ת)
+            </p>
+          )}
+          <Input
+            label="נושא"
+            value={newSubject}
+            onChange={(e) => setNewSubject(e.target.value)}
+            placeholder="נושא ההודעה"
+          />
+          <div className="w-full">
+            <label className="block text-sm font-medium text-sand-700 mb-1.5">
+              תוכן ההודעה
+            </label>
+            <textarea
+              value={newBody}
+              onChange={(e) => setNewBody(e.target.value)}
+              placeholder="כתוב/י את ההודעה כאן..."
+              rows={4}
+              required
+              className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 placeholder:text-sand-400 outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors duration-200"
+            />
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={newIsPinned}
+              onChange={(e) => setNewIsPinned(e.target.checked)}
+              className="w-4 h-4 rounded border-sand-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-sm font-medium text-sand-700">📌 נעוץ הודעה בראש הרשימה</span>
+          </label>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={creating || !newBody.trim()}>
+              {creating ? "שולח..." : "שלח הודעה"}
+            </Button>
+          </div>
+        </form>
+      )}
 
       {loading ? (
         <div className="space-y-4">
@@ -111,6 +242,18 @@ export default function MessagesPage() {
                     </time>
                   </div>
                 </div>
+                {canDelete(message) && (
+                  <button
+                    onClick={() => handleDeleteMessage(message.id)}
+                    disabled={deletingId === message.id}
+                    className="shrink-0 p-2 text-sand-400 hover:text-rainbow-red hover:bg-rainbow-red/10 rounded-lg transition-colors disabled:opacity-50"
+                    title="מחק הודעה"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
           ))}
