@@ -132,6 +132,31 @@ export default function ContactContentPage() {
           />
         </ContentSection>
 
+        <ContentSection title="מפה" defaultOpen={false}>
+          <Input
+            label="קישור מפה (Google Maps Embed)"
+            value={contact.map_embed_url || ""}
+            onChange={(e) => setContact({ ...contact, map_embed_url: e.target.value })}
+            placeholder="https://www.google.com/maps/embed?pb=..."
+            dir="ltr"
+          />
+          <p className="text-xs text-sand-400 mt-1">
+            גוגל מפות &rarr; שיתוף &rarr; הטמעת מפה &rarr; העתיקו את הקישור מתוך ה-src של ה-iframe
+          </p>
+          {contact.map_embed_url && (
+            <div className="rounded-xl overflow-hidden border border-sand-200 h-48 mt-3">
+              <iframe
+                src={contact.map_embed_url}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                title="תצוגה מקדימה של המפה"
+              />
+            </div>
+          )}
+        </ContentSection>
+
         <ContentSection title="רשתות חברתיות" defaultOpen={false}>
           <Input
             label="פייסבוק"

@@ -9,6 +9,7 @@ export interface ContactInfo {
   email: string;
   hours: string;
   fax?: string;
+  map_embed_url?: string;
   social?: {
     facebook?: string;
     instagram?: string;
