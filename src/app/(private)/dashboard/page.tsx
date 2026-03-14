@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
+import { createClient } from "@/lib/supabase/client";
 import { RAINBOW_COLORS } from "@/lib/constants";
 
 const quickLinks = [
@@ -11,8 +13,51 @@ const quickLinks = [
   { label: "צ׳אט כיתתי", href: "/chat", color: RAINBOW_COLORS[6], icon: "💬", bg: "from-purple-50 to-violet-50" },
 ];
 
+interface RecentMessage {
+  id: string;
+  subject: string | null;
+  body: string;
+  type: string;
+  created_at: string;
+  sender_id: string | null;
+}
+
+interface RecentPhoto {
+  id: string;
+  url: string;
+  caption: string | null;
+  created_at: string;
+  album_id: string;
+}
+
 export default function DashboardPage() {
   const { user, profile, loading } = useUser();
+  const [recentMessages, setRecentMessages] = useState<RecentMessage[]>([]);
+  const [recentPhotos, setRecentPhotos] = useState<RecentPhoto[]>([]);
+
+  useEffect(() => {
+    async function fetchRecent() {
+      const supabase = createClient();
+
+      const [messagesRes, photosRes] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("id, subject, body, type, created_at, sender_id")
+          .order("created_at", { ascending: false })
+          .limit(3),
+        supabase
+          .from("photos")
+          .select("id, url, caption, created_at, album_id")
+          .order("created_at", { ascending: false })
+          .limit(4),
+      ]);
+
+      setRecentMessages(messagesRes.data || []);
+      setRecentPhotos(photosRes.data || []);
+    }
+
+    fetchRecent();
+  }, []);
 
   if (loading) {
     return (
@@ -107,7 +152,7 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Announcements */}
+        {/* Recent Messages */}
         <div className="bg-white rounded-2xl shadow-sm border border-sand-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-sand-100 flex items-center gap-3">
             <div
@@ -121,10 +166,40 @@ export default function DashboardPage() {
             <h2 className="font-bold text-sand-900">הודעות אחרונות</h2>
           </div>
           <div className="p-6">
-            <div className="text-sand-400 text-sm text-center py-8">
-              <div className="text-3xl mb-2">📭</div>
-              אין הודעות חדשות
-            </div>
+            {recentMessages.length === 0 ? (
+              <div className="text-sand-400 text-sm text-center py-8">
+                <div className="text-3xl mb-2">📭</div>
+                אין הודעות חדשות
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentMessages.map((msg) => (
+                  <Link
+                    key={msg.id}
+                    href="/messages"
+                    className="block p-3 rounded-xl hover:bg-sand-50 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
+                        style={{ backgroundColor: msg.type === "announcement" ? RAINBOW_COLORS[4] : RAINBOW_COLORS[3] }}
+                      >
+                        {msg.type === "announcement" ? "📢" : "✉️"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-sand-900 truncate">
+                          {msg.subject || "הודעה"}
+                        </p>
+                        <p className="text-xs text-sand-500 truncate mt-0.5">{msg.body}</p>
+                        <p className="text-xs text-sand-400 mt-1">
+                          {new Date(msg.created_at).toLocaleDateString("he-IL")}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
           <div className="px-6 py-3 bg-sand-50 border-t border-sand-100">
             <Link
@@ -154,10 +229,33 @@ export default function DashboardPage() {
             <h2 className="font-bold text-sand-900">תמונות אחרונות</h2>
           </div>
           <div className="p-6">
-            <div className="text-sand-400 text-sm text-center py-8">
-              <div className="text-3xl mb-2">🖼️</div>
-              אין תמונות חדשות
-            </div>
+            {recentPhotos.length === 0 ? (
+              <div className="text-sand-400 text-sm text-center py-8">
+                <div className="text-3xl mb-2">🖼️</div>
+                אין תמונות חדשות
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {recentPhotos.map((photo) => (
+                  <Link
+                    key={photo.id}
+                    href="/photos"
+                    className="relative aspect-square rounded-xl overflow-hidden group"
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.caption || "תמונה"}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    {photo.caption && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                        <p className="text-xs text-white truncate">{photo.caption}</p>
+                      </div>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
           <div className="px-6 py-3 bg-sand-50 border-t border-sand-100">
             <Link
