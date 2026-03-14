@@ -144,6 +144,9 @@ export default function ContactContentPage() {
                 // Extract src URL if user pasted full iframe tag
                 const srcMatch = value.match(/src=["']([^"']+)["']/);
                 if (srcMatch) value = srcMatch[1];
+                // Decode HTML entities (e.g. &#39; → ')
+                value = value.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
+                value = value.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
                 setContact({ ...contact, map_embed_url: value });
               }}
               rows={3}
