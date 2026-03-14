@@ -133,15 +133,27 @@ export default function ContactContentPage() {
         </ContentSection>
 
         <ContentSection title="מפה" defaultOpen={false}>
-          <Input
-            label="קישור מפה (Google Maps Embed)"
-            value={contact.map_embed_url || ""}
-            onChange={(e) => setContact({ ...contact, map_embed_url: e.target.value })}
-            placeholder="https://www.google.com/maps/embed?pb=..."
-            dir="ltr"
-          />
+          <div>
+            <label className="block text-sm font-medium text-sand-700 mb-1.5">
+              הדביקו את קוד ההטמעה מגוגל מפות
+            </label>
+            <textarea
+              value={contact.map_embed_url || ""}
+              onChange={(e) => {
+                let value = e.target.value.trim();
+                // Extract src URL if user pasted full iframe tag
+                const srcMatch = value.match(/src=["']([^"']+)["']/);
+                if (srcMatch) value = srcMatch[1];
+                setContact({ ...contact, map_embed_url: value });
+              }}
+              rows={3}
+              dir="ltr"
+              className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 text-xs font-mono placeholder:text-sand-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y"
+              placeholder='הדביקו כאן את כל קוד ה-iframe מגוגל מפות, או רק את הקישור'
+            />
+          </div>
           <p className="text-xs text-sand-400 mt-1">
-            גוגל מפות &rarr; שיתוף &rarr; הטמעת מפה &rarr; העתיקו את הקישור מתוך ה-src של ה-iframe
+            גוגל מפות &rarr; שיתוף &rarr; הטמעת מפה &rarr; העתיקו את כל הקוד והדביקו כאן
           </p>
           {contact.map_embed_url && (
             <div className="rounded-xl overflow-hidden border border-sand-200 h-48 mt-3">
