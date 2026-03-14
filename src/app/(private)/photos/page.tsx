@@ -105,7 +105,7 @@ export default function PhotosPage() {
         .from("class-photos")
         .getPublicUrl(filePath);
 
-      await supabase.from("class-photos").insert({
+      await supabase.from("photos").insert({
         album_id: albumId,
         storage_path: filePath,
         url: urlData.publicUrl,
