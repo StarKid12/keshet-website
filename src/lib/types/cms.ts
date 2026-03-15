@@ -13,6 +13,12 @@ export interface ContactInfo {
   social?: {
     facebook?: string;
     instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+    whatsapp?: string;
+    telegram?: string;
+    linkedin?: string;
+    twitter?: string;
   };
 }
 

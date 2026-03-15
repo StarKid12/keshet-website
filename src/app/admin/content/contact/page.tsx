@@ -156,7 +156,7 @@ export default function ContactContentPage() {
             />
           </div>
           <p className="text-xs text-sand-400 mt-1">
-            גוגל מפות &rarr; שיתוף &rarr; הטמעת מפה &rarr; העתיקו את כל הקוד והדביקו כאן
+            העתיקו את כל הקוד והדביקו כאן &larr; הטמעת מפה &larr; שיתוף &larr; גוגל מפות
           </p>
           {contact.map_embed_url && (
             <div className="rounded-xl overflow-hidden border border-sand-200 h-48 mt-3">
@@ -195,6 +195,78 @@ export default function ContactContentPage() {
               })
             }
             placeholder="https://instagram.com/..."
+            dir="ltr"
+          />
+          <Input
+            label="יוטיוב"
+            value={contact.social?.youtube || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, youtube: e.target.value },
+              })
+            }
+            placeholder="https://youtube.com/..."
+            dir="ltr"
+          />
+          <Input
+            label="טיקטוק"
+            value={contact.social?.tiktok || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, tiktok: e.target.value },
+              })
+            }
+            placeholder="https://tiktok.com/@..."
+            dir="ltr"
+          />
+          <Input
+            label="וואטסאפ"
+            value={contact.social?.whatsapp || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, whatsapp: e.target.value },
+              })
+            }
+            placeholder="https://wa.me/972..."
+            dir="ltr"
+          />
+          <Input
+            label="טלגרם"
+            value={contact.social?.telegram || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, telegram: e.target.value },
+              })
+            }
+            placeholder="https://t.me/..."
+            dir="ltr"
+          />
+          <Input
+            label="לינקדאין"
+            value={contact.social?.linkedin || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, linkedin: e.target.value },
+              })
+            }
+            placeholder="https://linkedin.com/..."
+            dir="ltr"
+          />
+          <Input
+            label="X (טוויטר)"
+            value={contact.social?.twitter || ""}
+            onChange={(e) =>
+              setContact({
+                ...contact,
+                social: { ...contact.social, twitter: e.target.value },
+              })
+            }
+            placeholder="https://x.com/..."
             dir="ltr"
           />
         </ContentSection>
