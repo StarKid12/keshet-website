@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { useCommitteeChat } from "@/hooks/useCommitteeChat";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { RAINBOW_COLORS } from "@/lib/constants";
+import { CommitteePolls } from "@/components/committees/CommitteePolls";
 import Link from "next/link";
 
 function getAvatarColor(name: string): string {
@@ -39,11 +40,16 @@ interface SearchUser {
 
 export default function CommitteeChatPage() {
   const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const { user, profile } = useUser();
   const { messages, loading: chatLoading, sendMessage } = useCommitteeChat(id, user?.id || null);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<"chat" | "polls">(
+    searchParams.get("tab") === "polls" ? "polls" : "chat"
+  );
+  const highlightPollId = searchParams.get("poll");
 
   const [committee, setCommittee] = useState<Committee | null>(null);
   const [isMember, setIsMember] = useState<boolean | null>(null);
@@ -215,21 +221,62 @@ export default function CommitteeChatPage() {
           </div>
         </div>
 
-        {canManage && (
-          <button
-            onClick={openSettings}
-            className="w-10 h-10 rounded-xl bg-sand-100 flex items-center justify-center hover:bg-sand-200 transition-colors"
-            title="הגדרות ועדה"
-          >
-            <svg className="w-5 h-5 text-sand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Tabs */}
+          <div className="flex bg-sand-100 rounded-xl p-1">
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === "chat"
+                  ? "bg-white text-sand-900 shadow-sm"
+                  : "text-sand-500 hover:text-sand-700"
+              }`}
+            >
+              צ׳אט
+            </button>
+            <button
+              onClick={() => setActiveTab("polls")}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === "polls"
+                  ? "bg-white text-sand-900 shadow-sm"
+                  : "text-sand-500 hover:text-sand-700"
+              }`}
+            >
+              סקרים
+            </button>
+          </div>
+
+          {canManage && (
+            <button
+              onClick={openSettings}
+              className="w-10 h-10 rounded-xl bg-sand-100 flex items-center justify-center hover:bg-sand-200 transition-colors"
+              title="הגדרות ועדה"
+            >
+              <svg className="w-5 h-5 text-sand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Polls Tab */}
+      {activeTab === "polls" && (
+        <div className="flex-1 overflow-y-auto pb-4">
+          <CommitteePolls
+            committeeId={id}
+            userId={user!.id}
+            isCommitteeMember={true}
+            committeeTeacherId={committee.teacher_id}
+            userRole={profile?.role || ""}
+            highlightPollId={highlightPollId}
+          />
+        </div>
+      )}
+
       {/* Chat Messages */}
+      {activeTab === "chat" && (
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-sand-200 overflow-hidden flex flex-col">
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {chatLoading ? (
@@ -300,6 +347,7 @@ export default function CommitteeChatPage() {
           </Button>
         </form>
       </div>
+      )}
 
       {/* Settings Panel (Slide-over) */}
       {settingsOpen && (

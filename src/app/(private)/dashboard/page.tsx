@@ -13,6 +13,14 @@ const quickLinks = [
   { label: "צ׳אט כיתתי", href: "/chat", color: RAINBOW_COLORS[6], icon: "💬", bg: "from-purple-50 to-violet-50" },
 ];
 
+interface ActivePoll {
+  id: string;
+  question: string;
+  committee_id: string;
+  created_at: string;
+  committee_name: string;
+}
+
 interface RecentMessage {
   id: string;
   subject: string | null;
@@ -34,12 +42,14 @@ export default function DashboardPage() {
   const { user, profile, loading } = useUser();
   const [recentMessages, setRecentMessages] = useState<RecentMessage[]>([]);
   const [recentPhotos, setRecentPhotos] = useState<RecentPhoto[]>([]);
+  const [activePolls, setActivePolls] = useState<ActivePoll[]>([]);
+  const [votedPollIds, setVotedPollIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function fetchRecent() {
       const supabase = createClient();
 
-      const [messagesRes, photosRes] = await Promise.all([
+      const [messagesRes, photosRes, pollsRes] = await Promise.all([
         supabase
           .from("messages")
           .select("id, subject, body, type, created_at, sender_id")
@@ -50,14 +60,39 @@ export default function DashboardPage() {
           .select("id, url, caption, created_at, album_id")
           .order("created_at", { ascending: false })
           .limit(4),
+        supabase
+          .from("committee_polls")
+          .select("id, question, committee_id, created_at, committees!committee_id(name)")
+          .eq("is_open", true)
+          .order("created_at", { ascending: false })
+          .limit(5),
       ]);
 
       setRecentMessages(messagesRes.data || []);
       setRecentPhotos(photosRes.data || []);
+
+      const polls = (pollsRes.data || []).map((p: Record<string, unknown>) => ({
+        id: p.id as string,
+        question: p.question as string,
+        committee_id: p.committee_id as string,
+        created_at: p.created_at as string,
+        committee_name: (p.committees as { name: string } | null)?.name || "",
+      }));
+      setActivePolls(polls);
+
+      // Check which polls the user has already voted on
+      if (polls.length > 0 && user) {
+        const { data: votes } = await supabase
+          .from("committee_poll_votes")
+          .select("poll_id")
+          .eq("voter_id", user.id)
+          .in("poll_id", polls.map((p: ActivePoll) => p.id));
+        setVotedPollIds(new Set((votes || []).map((v: { poll_id: string }) => v.poll_id)));
+      }
     }
 
     fetchRecent();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (
@@ -149,6 +184,59 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* Active Polls */}
+      {activePolls.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-sand-200 overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-sand-100 flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: `${RAINBOW_COLORS[5]}20` }}
+            >
+              <svg className="w-4 h-4" style={{ color: RAINBOW_COLORS[5] }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <h2 className="font-bold text-sand-900">סקרים פעילים</h2>
+          </div>
+          <div className="p-4 space-y-3">
+            {activePolls.map((poll) => {
+              const hasVoted = votedPollIds.has(poll.id);
+              return (
+                <Link
+                  key={poll.id}
+                  href={`/committees/${poll.committee_id}?tab=polls&poll=${poll.id}`}
+                  className="block p-4 rounded-xl border border-sand-200 hover:border-primary-300 hover:shadow-sm transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+                      style={{ backgroundColor: `${RAINBOW_COLORS[5]}15` }}
+                    >
+                      {hasVoted ? "✅" : "🗳️"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-sand-900 truncate">{poll.question}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-sand-400">{poll.committee_name}</span>
+                        <span className="text-xs text-sand-300">·</span>
+                        <span className="text-xs text-sand-400">
+                          {new Date(poll.created_at).toLocaleDateString("he-IL")}
+                        </span>
+                      </div>
+                    </div>
+                    {hasVoted ? (
+                      <span className="text-xs text-rainbow-green font-medium shrink-0">הצבעת</span>
+                    ) : (
+                      <span className="text-xs text-primary-600 font-medium shrink-0">הצביעו עכשיו</span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
