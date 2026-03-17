@@ -11,6 +11,7 @@ interface CommitteePollsProps {
   isCommitteeMember: boolean;
   committeeTeacherId: string | null;
   userRole: string;
+  canCreatePolls: boolean;
   highlightPollId?: string | null;
 }
 
@@ -20,6 +21,7 @@ export function CommitteePolls({
   isCommitteeMember,
   committeeTeacherId,
   userRole,
+  canCreatePolls,
   highlightPollId,
 }: CommitteePollsProps) {
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -66,8 +68,8 @@ export function CommitteePolls({
 
   return (
     <div className="space-y-4">
-      {/* Create poll button - only for committee members */}
-      {isCommitteeMember && (
+      {/* Create poll button - only for committee members with polls privilege */}
+      {isCommitteeMember && canCreatePolls && (
         <button
           onClick={() => setShowCreateModal(true)}
           className="w-full py-3 rounded-2xl border-2 border-dashed border-sand-300 text-sand-500 hover:border-primary-400 hover:text-primary-600 transition-colors text-sm font-medium flex items-center justify-center gap-2"

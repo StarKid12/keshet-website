@@ -23,6 +23,7 @@ interface Committee {
   name: string;
   description: string | null;
   teacher_id: string | null;
+  can_create_polls: boolean;
 }
 
 interface Member {
@@ -76,7 +77,7 @@ export default function CommitteeChatPage() {
 
       const { data: comm } = await supabase
         .from("committees")
-        .select("id, name, description, teacher_id")
+        .select("id, name, description, teacher_id, can_create_polls")
         .eq("id", id)
         .single();
 
@@ -270,6 +271,7 @@ export default function CommitteeChatPage() {
             isCommitteeMember={true}
             committeeTeacherId={committee.teacher_id}
             userRole={profile?.role || ""}
+            canCreatePolls={committee.can_create_polls}
             highlightPollId={highlightPollId}
           />
         </div>

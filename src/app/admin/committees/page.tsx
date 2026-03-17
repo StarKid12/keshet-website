@@ -12,6 +12,7 @@ interface Committee {
   description: string | null;
   teacher_id: string | null;
   is_active: boolean;
+  can_create_polls: boolean;
   created_at: string;
 }
 
@@ -348,6 +349,35 @@ export default function AdminCommitteesPage() {
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Polls Permission */}
+                    <div className="p-5 border-t border-sand-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-sand-900 text-sm">הרשאת סקרים</h4>
+                          <p className="text-xs text-sand-400 mt-0.5">האם חברי הועדה יכולים ליצור סקרים?</p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            const supabase = createClient();
+                            const newVal = !committee.can_create_polls;
+                            await supabase.from("committees").update({ can_create_polls: newVal }).eq("id", committee.id);
+                            setCommittees((prev) =>
+                              prev.map((c) => (c.id === committee.id ? { ...c, can_create_polls: newVal } : c))
+                            );
+                          }}
+                          className={`relative w-11 h-6 rounded-full transition-colors ${
+                            committee.can_create_polls ? "bg-primary-600" : "bg-sand-300"
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${
+                              committee.can_create_polls ? "start-5" : "start-0.5"
+                            }`}
+                          />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Members */}

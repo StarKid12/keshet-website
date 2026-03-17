@@ -191,7 +191,7 @@ export function CreatePollModal({ committeeId, creatorId, onClose, onCreated }: 
             >
               ביטול
             </button>
-            <Button onClick={handleSubmit} disabled={submitting}>
+            <Button onClick={handleSubmit} disabled={submitting || !question.trim() || options.filter((o) => o.trim()).length < 2 || targetRoles.length === 0}>
               {submitting ? "יוצר..." : "פרסום סקר"}
             </Button>
           </div>

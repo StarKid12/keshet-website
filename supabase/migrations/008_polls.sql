@@ -2,6 +2,9 @@
 -- Committee Polls (סקרים) Feature
 -- ============================================
 
+-- Add polls privilege to committees table
+ALTER TABLE committees ADD COLUMN can_create_polls BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Polls table
 CREATE TABLE committee_polls (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
