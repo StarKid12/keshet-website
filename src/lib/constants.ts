@@ -21,6 +21,7 @@ export const PRIVATE_NAV_ITEMS = [
   { label: "מערכת שעות", href: "/schedule", icon: "calendar" },
   { label: "הודעות", href: "/messages", icon: "mail" },
   { label: "צ׳אט כיתתי", href: "/chat", icon: "chat" },
+  { label: "ועדות", href: "/committees", icon: "committee" },
 ] as const;
 
 export const DAYS_OF_WEEK_HE = [
