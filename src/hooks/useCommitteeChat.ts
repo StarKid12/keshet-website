@@ -25,7 +25,7 @@ export function useCommitteeChat(committeeId: string | null, userId: string | nu
     if (!committeeId) return;
 
     async function fetchMessages() {
-      const { data } = await supabaseRef.current
+      const { data, error } = await supabaseRef.current
         .from("committee_messages")
         .select(`
           id, committee_id, sender_id, content, created_at,
@@ -35,6 +35,7 @@ export function useCommitteeChat(committeeId: string | null, userId: string | nu
         .order("created_at", { ascending: true })
         .limit(100);
 
+      if (error) console.error("Failed to fetch committee messages:", error);
       setMessages((data as unknown as CommitteeChatMessage[]) || []);
       setLoading(false);
     }
@@ -82,11 +83,12 @@ export function useCommitteeChat(committeeId: string | null, userId: string | nu
     async (content: string) => {
       if (!committeeId || !userId || !content.trim()) return;
 
-      await supabaseRef.current.from("committee_messages").insert({
+      const { error } = await supabaseRef.current.from("committee_messages").insert({
         committee_id: committeeId,
         sender_id: userId,
         content: content.trim(),
       });
+      if (error) console.error("Failed to send committee message:", error);
     },
     [committeeId, userId]
   );
