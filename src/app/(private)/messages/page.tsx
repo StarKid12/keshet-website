@@ -113,13 +113,15 @@ export default function MessagesPage() {
     setDeletingId(messageId);
     const supabase = createClient();
 
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from("messages")
-      .delete()
+      .delete({ count: "exact" })
       .eq("id", messageId);
 
-    if (!error) {
+    if (!error && count && count > 0) {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    } else {
+      alert("לא ניתן למחוק את ההודעה");
     }
 
     setDeletingId(null);
