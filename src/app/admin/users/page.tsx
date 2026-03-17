@@ -19,6 +19,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "teacher" | "parent" | "student">("all");
 
   useEffect(() => {
     fetchUsers();
@@ -69,8 +70,9 @@ export default function AdminUsersPage() {
   }
 
   const filteredUsers = users.filter((u) => {
-    if (filter === "pending") return !u.is_approved;
-    if (filter === "approved") return u.is_approved;
+    if (filter === "pending" && u.is_approved) return false;
+    if (filter === "approved" && !u.is_approved) return false;
+    if (roleFilter !== "all" && u.role !== roleFilter) return false;
     return true;
   });
 
@@ -91,7 +93,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4">
         {[
           { value: "all", label: "הכל" },
           { value: "pending", label: "ממתינים" },
@@ -103,6 +105,29 @@ export default function AdminUsersPage() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === f.value
                 ? "bg-primary-600 text-white"
+                : "bg-white text-sand-600 border border-sand-200 hover:bg-sand-50"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Role filters */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { value: "all", label: "כל התפקידים" },
+          { value: "admin", label: "מנהלים" },
+          { value: "teacher", label: "מורים" },
+          { value: "parent", label: "הורים" },
+          { value: "student", label: "תלמידים" },
+        ].map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setRoleFilter(f.value as typeof roleFilter)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              roleFilter === f.value
+                ? "bg-sand-800 text-white"
                 : "bg-white text-sand-600 border border-sand-200 hover:bg-sand-50"
             }`}
           >
