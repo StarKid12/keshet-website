@@ -9,6 +9,11 @@ interface CreatePollModalProps {
   creatorId: string;
   onClose: () => void;
   onCreated: () => void;
+  // Edit mode props
+  editPollId?: string;
+  initialQuestion?: string;
+  initialOptions?: string[];
+  initialTargetRoles?: string[];
 }
 
 const ROLE_OPTIONS = [
@@ -17,10 +22,20 @@ const ROLE_OPTIONS = [
   { value: "parent", label: "הורים" },
 ];
 
-export function CreatePollModal({ committeeId, creatorId, onClose, onCreated }: CreatePollModalProps) {
-  const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState(["", ""]);
-  const [targetRoles, setTargetRoles] = useState<string[]>([]);
+export function CreatePollModal({
+  committeeId,
+  creatorId,
+  onClose,
+  onCreated,
+  editPollId,
+  initialQuestion = "",
+  initialOptions,
+  initialTargetRoles = [],
+}: CreatePollModalProps) {
+  const isEdit = !!editPollId;
+  const [question, setQuestion] = useState(initialQuestion);
+  const [options, setOptions] = useState(initialOptions || ["", ""]);
+  const [targetRoles, setTargetRoles] = useState<string[]>(initialTargetRoles);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -66,18 +81,34 @@ export function CreatePollModal({ committeeId, creatorId, onClose, onCreated }: 
     setSubmitting(true);
 
     const supabase = createClient();
-    const { error: rpcError } = await supabase.rpc("create_poll", {
-      p_committee_id: committeeId,
-      p_creator_id: creatorId,
-      p_question: question.trim(),
-      p_target_roles: targetRoles,
-      p_options: filledOptions,
-    });
 
-    if (rpcError) {
-      setError(rpcError.message);
-      setSubmitting(false);
-      return;
+    if (isEdit) {
+      const { error: rpcError } = await supabase.rpc("edit_poll", {
+        p_poll_id: editPollId,
+        p_question: question.trim(),
+        p_target_roles: targetRoles,
+        p_options: filledOptions,
+      });
+
+      if (rpcError) {
+        setError(rpcError.message);
+        setSubmitting(false);
+        return;
+      }
+    } else {
+      const { error: rpcError } = await supabase.rpc("create_poll", {
+        p_committee_id: committeeId,
+        p_creator_id: creatorId,
+        p_question: question.trim(),
+        p_target_roles: targetRoles,
+        p_options: filledOptions,
+      });
+
+      if (rpcError) {
+        setError(rpcError.message);
+        setSubmitting(false);
+        return;
+      }
     }
 
     onCreated();
@@ -91,7 +122,9 @@ export function CreatePollModal({ committeeId, creatorId, onClose, onCreated }: 
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
           {/* Header */}
           <div className="p-5 border-b border-sand-200 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-sand-900">יצירת סקר חדש</h2>
+            <h2 className="text-lg font-bold text-sand-900">
+              {isEdit ? "עריכת סקר" : "יצירת סקר חדש"}
+            </h2>
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-lg bg-sand-100 flex items-center justify-center hover:bg-sand-200 transition-colors"
@@ -104,6 +137,13 @@ export function CreatePollModal({ committeeId, creatorId, onClose, onCreated }: 
 
           {/* Body */}
           <div className="p-5 space-y-5">
+            {/* Edit warning */}
+            {isEdit && (
+              <p className="text-xs text-rainbow-orange bg-rainbow-orange/10 px-4 py-2.5 rounded-xl">
+                עריכת האפשרויות תאפס את כל ההצבעות הקיימות
+              </p>
+            )}
+
             {/* Question */}
             <div>
               <label className="block text-sm font-medium text-sand-700 mb-1.5">שאלה</label>
@@ -192,7 +232,7 @@ export function CreatePollModal({ committeeId, creatorId, onClose, onCreated }: 
               ביטול
             </button>
             <Button onClick={handleSubmit} disabled={submitting || !question.trim() || options.filter((o) => o.trim()).length < 2 || targetRoles.length === 0}>
-              {submitting ? "יוצר..." : "פרסום סקר"}
+              {submitting ? (isEdit ? "שומר..." : "יוצר...") : (isEdit ? "שמירת שינויים" : "פרסום סקר")}
             </Button>
           </div>
         </div>
