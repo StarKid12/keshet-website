@@ -11,12 +11,12 @@ import { createClient } from "@/lib/supabase/client";
 const adminNav = [
   { label: "סקירה כללית", href: "/admin", icon: "📊", color: RAINBOW_COLORS[0] },
   { label: "משתמשים", href: "/admin/users", icon: "👥", color: RAINBOW_COLORS[1] },
-  { label: "כיתות", href: "/admin/classes", icon: "🏫", color: RAINBOW_COLORS[2] },
-  { label: "מיילים מאושרים", href: "/admin/approved-emails", icon: "📧", color: RAINBOW_COLORS[3] },
-  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[4] },
-  { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[5] },
-  { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[6] },
-  { label: "הודעות", href: "/admin/messages", icon: "📢", color: RAINBOW_COLORS[0] },
+  { label: "מיילים מאושרים", href: "/admin/approved-emails", icon: "📧", color: RAINBOW_COLORS[2] },
+  { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[3] },
+  { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[4] },
+  { label: "כיתות", href: "/admin/classes", icon: "🏫", color: RAINBOW_COLORS[5] },
+  { label: "הודעות", href: "/admin/messages", icon: "📢", color: RAINBOW_COLORS[6] },
+  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[0] },
   { label: "ועדות", href: "/admin/committees", icon: "🏛️", color: RAINBOW_COLORS[1] },
 ];
 
