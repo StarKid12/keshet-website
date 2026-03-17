@@ -5,12 +5,14 @@ import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { RoleSelector } from "@/components/ui/RoleSelector";
 
 export default function AdminMessagesPage() {
   const { user } = useUser();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [isPinned, setIsPinned] = useState(false);
+  const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -26,6 +28,7 @@ export default function AdminMessagesPage() {
       body,
       sender_id: user.id,
       is_pinned: isPinned,
+      target_roles: targetRoles,
       class_id: null, // school-wide
     });
     setSending(false);
@@ -33,6 +36,7 @@ export default function AdminMessagesPage() {
     setSubject("");
     setBody("");
     setIsPinned(false);
+    setTargetRoles([]);
     setTimeout(() => setSent(false), 3000);
   }
 
@@ -72,6 +76,7 @@ export default function AdminMessagesPage() {
               required
             />
           </div>
+          <RoleSelector selectedRoles={targetRoles} onChange={setTargetRoles} />
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"

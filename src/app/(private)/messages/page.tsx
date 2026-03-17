@@ -6,6 +6,7 @@ import { useUser } from "@/hooks/useUser";
 import { RAINBOW_COLORS } from "@/lib/constants";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { RoleSelector } from "@/components/ui/RoleSelector";
 
 interface Message {
   id: string;
@@ -33,6 +34,7 @@ export default function MessagesPage() {
   const [newSubject, setNewSubject] = useState("");
   const [newBody, setNewBody] = useState("");
   const [newIsPinned, setNewIsPinned] = useState(false);
+  const [newTargetRoles, setNewTargetRoles] = useState<string[]>([]);
 
   const isTeacherOrAdmin = profile?.role === "teacher" || profile?.role === "admin";
 
@@ -75,6 +77,7 @@ export default function MessagesPage() {
         subject: newSubject.trim() || null,
         body: newBody.trim(),
         is_pinned: newIsPinned,
+        target_roles: newTargetRoles,
         sender_id: user.id,
         class_id: profile.role === "admin" ? null : profile.class_id,
       })
@@ -89,6 +92,7 @@ export default function MessagesPage() {
       setNewSubject("");
       setNewBody("");
       setNewIsPinned(false);
+      setNewTargetRoles([]);
       setShowForm(false);
     }
 
@@ -145,11 +149,7 @@ export default function MessagesPage() {
           className="bg-white rounded-2xl p-6 shadow-sm border border-sand-200 mb-8 space-y-4"
         >
           <h2 className="text-lg font-bold text-sand-900">הודעה חדשה</h2>
-          {profile?.role === "admin" && (
-            <p className="text-sm text-sand-500">
-              ההודעה תישלח לכל בית הספר (כמנהל/ת)
-            </p>
-          )}
+          <RoleSelector selectedRoles={newTargetRoles} onChange={setNewTargetRoles} />
           <Input
             label="נושא"
             value={newSubject}
