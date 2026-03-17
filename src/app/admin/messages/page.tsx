@@ -22,7 +22,7 @@ export default function AdminMessagesPage() {
 
     setSending(true);
     const supabase = createClient();
-    await supabase.from("messages").insert({
+    const { error } = await supabase.from("messages").insert({
       type: "announcement",
       subject: subject || null,
       body,
@@ -32,6 +32,12 @@ export default function AdminMessagesPage() {
       class_id: null, // school-wide
     });
     setSending(false);
+
+    if (error) {
+      alert("שגיאה בשליחת ההודעה: " + error.message);
+      return;
+    }
+
     setSent(true);
     setSubject("");
     setBody("");

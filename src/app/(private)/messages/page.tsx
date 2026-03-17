@@ -43,14 +43,22 @@ export default function MessagesPage() {
       const supabase = createClient();
 
       // Fetch announcements for user's class or school-wide
-      const { data } = await supabase
+      let query = supabase
         .from("messages")
         .select(`
           id, type, subject, body, is_pinned, created_at, sender_id,
           sender:profiles!sender_id(full_name, role)
         `)
-        .eq("type", "announcement")
-        .or(`class_id.is.null,class_id.eq.${profile?.class_id}`)
+        .eq("type", "announcement");
+
+      // Admin/teacher sees all messages, others see school-wide + their class
+      if (profile?.role !== "admin" && profile?.role !== "teacher") {
+        query = profile?.class_id
+          ? query.or(`class_id.is.null,class_id.eq.${profile.class_id}`)
+          : query.is("class_id", null);
+      }
+
+      const { data } = await query
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
 
