@@ -92,6 +92,13 @@ export default function AdminCommitteesPage() {
     if (error) {
       alert("שגיאה ביצירת ועדה: " + error.message);
     } else if (data) {
+      // Auto-add the teacher as a member
+      if (data.teacher_id) {
+        await supabase
+          .from("committee_members")
+          .insert({ committee_id: data.id, user_id: data.teacher_id })
+          .select();
+      }
       setCommittees((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
       setNewName("");
       setNewDesc("");
@@ -125,6 +132,12 @@ export default function AdminCommitteesPage() {
   async function updateTeacher(committeeId: string, teacherId: string | null) {
     const supabase = createClient();
     await supabase.from("committees").update({ teacher_id: teacherId || null }).eq("id", committeeId);
+    // Auto-add new teacher as member (ignore if already a member)
+    if (teacherId) {
+      await supabase
+        .from("committee_members")
+        .upsert({ committee_id: committeeId, user_id: teacherId }, { onConflict: "committee_id,user_id" });
+    }
     setCommittees((prev) =>
       prev.map((c) => (c.id === committeeId ? { ...c, teacher_id: teacherId || null } : c))
     );

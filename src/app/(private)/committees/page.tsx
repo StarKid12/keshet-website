@@ -51,14 +51,27 @@ export default function CommitteesPage() {
         setCommittees(withCounts);
       }
     } else {
-      // Regular users see committees they belong to
+      // Regular users see committees they belong to OR are the teacher of
       const { data: memberships } = await supabase
         .from("committee_members")
         .select("committee_id")
         .eq("user_id", user!.id);
 
-      if (memberships && memberships.length > 0) {
-        const ids = memberships.map((m) => m.committee_id);
+      const memberIds = new Set((memberships || []).map((m) => m.committee_id));
+
+      // Also get committees where user is the teacher
+      const { data: teacherOf } = await supabase
+        .from("committees")
+        .select("id")
+        .eq("teacher_id", user!.id)
+        .eq("is_active", true);
+
+      for (const c of teacherOf || []) {
+        memberIds.add(c.id);
+      }
+
+      const ids = Array.from(memberIds);
+      if (ids.length > 0) {
         const { data } = await supabase
           .from("committees")
           .select("*, teacher:profiles!teacher_id(full_name)")
