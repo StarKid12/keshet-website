@@ -22,9 +22,9 @@ export default function CommitteesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !profile) return;
     fetchCommittees();
-  }, [user]);
+  }, [user, profile]);
 
   async function fetchCommittees() {
     const supabase = createClient();
