@@ -100,6 +100,13 @@ export default function CommitteeChatPage() {
     fetchCommittee();
   }, [id, user, profile?.role]);
 
+  // Redirect to chat tab if polls are disabled
+  useEffect(() => {
+    if (committee && !committee.can_create_polls && activeTab === "polls") {
+      setActiveTab("chat");
+    }
+  }, [committee, activeTab]);
+
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -235,16 +242,18 @@ export default function CommitteeChatPage() {
             >
               צ׳אט
             </button>
-            <button
-              onClick={() => setActiveTab("polls")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === "polls"
-                  ? "bg-white text-sand-900 shadow-sm"
-                  : "text-sand-500 hover:text-sand-700"
-              }`}
-            >
-              סקרים
-            </button>
+            {committee.can_create_polls && (
+              <button
+                onClick={() => setActiveTab("polls")}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === "polls"
+                    ? "bg-white text-sand-900 shadow-sm"
+                    : "text-sand-500 hover:text-sand-700"
+                }`}
+              >
+                סקרים
+              </button>
+            )}
           </div>
 
           {canManage && (
