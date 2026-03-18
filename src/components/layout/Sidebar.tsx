@@ -51,9 +51,11 @@ const navColors = [
 
 interface SidebarProps {
   onClose?: () => void;
+  bgColor?: string;
+  onColorChange?: (color: string) => void;
 }
 
-export function Sidebar({ onClose }: SidebarProps) {
+export function Sidebar({ onClose, bgColor, onColorChange }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useUser();
@@ -170,6 +172,35 @@ export function Sidebar({ onClose }: SidebarProps) {
           </>
         )}
       </nav>
+
+      {/* Color picker */}
+      {onColorChange && (
+        <div className="px-5 py-3 border-t border-white/10">
+          <div className="flex items-center gap-2 justify-center">
+            <button
+              onClick={() => onColorChange("default")}
+              className="w-6 h-6 rounded-full border-2 transition-all duration-200 bg-sand-50 shrink-0"
+              style={{
+                borderColor: bgColor === "default" ? "white" : "rgba(255,255,255,0.2)",
+                transform: bgColor === "default" ? "scale(1.2)" : "scale(1)",
+              }}
+              title="ברירת מחדל"
+            />
+            {RAINBOW_COLORS.map((color) => (
+              <button
+                key={color}
+                onClick={() => onColorChange(color)}
+                className="w-6 h-6 rounded-full border-2 transition-all duration-200 shrink-0"
+                style={{
+                  backgroundColor: color,
+                  borderColor: bgColor === color ? "white" : "transparent",
+                  transform: bgColor === color ? "scale(1.2)" : "scale(1)",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="p-4 border-t border-white/10">

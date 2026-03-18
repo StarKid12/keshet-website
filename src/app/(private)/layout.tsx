@@ -1,8 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { RAINBOW_COLORS } from "@/lib/constants";
+
+const BG_TINTS: Record<string, string> = {
+  default: "",
+  "#e74c3c": "#fef2f2", // red
+  "#f39c12": "#fffbeb", // orange
+  "#f1c40f": "#fefce8", // yellow
+  "#27ae60": "#f0fdf4", // green
+  "#2980b9": "#eff6ff", // blue
+  "#5b4dbd": "#f5f3ff", // indigo
+  "#8e44ad": "#faf5ff", // violet
+};
 
 export default function PrivateLayout({
   children,
@@ -10,9 +21,24 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [bgColor, setBgColor] = useState("default");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("keshet-bg-color");
+    if (saved && BG_TINTS[saved]) setBgColor(saved);
+  }, []);
+
+  function handleColorChange(color: string) {
+    setBgColor(color);
+    localStorage.setItem("keshet-bg-color", color);
+  }
+
+  const bgStyle = bgColor !== "default" && BG_TINTS[bgColor]
+    ? { backgroundColor: BG_TINTS[bgColor] }
+    : undefined;
 
   return (
-    <div className="min-h-screen bg-sand-50">
+    <div className="min-h-screen bg-sand-50" style={bgStyle}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -26,7 +52,11 @@ export default function PrivateLayout({
         className="fixed top-0 bottom-0 z-50 hidden lg:block"
         style={{ right: 0 }}
       >
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        <Sidebar
+          onClose={() => setSidebarOpen(false)}
+          bgColor={bgColor}
+          onColorChange={handleColorChange}
+        />
       </div>
 
       {/* Mobile sidebar - slides from right */}
@@ -36,13 +66,20 @@ export default function PrivateLayout({
           right: sidebarOpen ? 0 : "-16rem",
         }}
       >
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        <Sidebar
+          onClose={() => setSidebarOpen(false)}
+          bgColor={bgColor}
+          onColorChange={handleColorChange}
+        />
       </div>
 
       {/* Main content */}
       <div className="lg:pr-64">
         {/* Top bar with toggle - mobile only */}
-        <div className="sticky top-0 z-30 bg-sand-50/80 backdrop-blur-sm border-b border-sand-200/50 px-4 py-3 flex items-center gap-3 lg:hidden">
+        <div
+          className="sticky top-0 z-30 backdrop-blur-sm border-b border-sand-200/50 px-4 py-3 flex items-center gap-3 lg:hidden"
+          style={{ backgroundColor: BG_TINTS[bgColor] ? `${BG_TINTS[bgColor]}cc` : undefined }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
             className="w-10 h-10 rounded-xl bg-white shadow-sm border border-sand-200 flex items-center justify-center"
