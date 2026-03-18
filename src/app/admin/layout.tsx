@@ -18,6 +18,7 @@ const adminNav = [
   { label: "הודעות", href: "/admin/messages", icon: "📢", color: RAINBOW_COLORS[6] },
   { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[0] },
   { label: "ועדות", href: "/admin/committees", icon: "🏛️", color: RAINBOW_COLORS[1] },
+  { label: "מערכת שעות", href: "/admin/timetable", icon: "🕐", color: RAINBOW_COLORS[2] },
 ];
 
 export default function AdminLayout({

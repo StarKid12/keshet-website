@@ -48,6 +48,21 @@ export const GRADE_LEVELS = [
   { value: 12, label: "כיתה י״ב" },
 ] as const;
 
+export const TIMETABLE_SLOTS = [
+  { start: "08:00", end: "08:30", type: "lesson" as const },
+  { start: "08:30", end: "09:15", type: "lesson" as const },
+  { start: "09:15", end: "10:00", type: "lesson" as const },
+  { start: "10:00", end: "10:30", type: "break" as const },
+  { start: "10:30", end: "11:15", type: "lesson" as const },
+  { start: "11:15", end: "12:00", type: "lesson" as const },
+  { start: "12:00", end: "12:30", type: "break" as const },
+  { start: "12:30", end: "13:15", type: "lesson" as const },
+  { start: "13:15", end: "14:00", type: "lesson" as const },
+  { start: "14:00", end: "14:30", type: "break" as const },
+  { start: "14:30", end: "15:15", type: "lesson" as const },
+  { start: "15:15", end: "16:00", type: "lesson" as const },
+] as const;
+
 export const RAINBOW_COLORS = [
   "#e74c3c", // red
   "#f39c12", // orange

@@ -54,6 +54,14 @@ const adminLinks = [
     color: RAINBOW_COLORS[6],
     statKey: "messages" as keyof Stats,
   },
+  {
+    title: "מערכת שעות",
+    description: "הוספת שיעורים שתלמידים יוכלו לבחור מתוכם",
+    href: "/admin/timetable",
+    icon: "🕐",
+    color: RAINBOW_COLORS[2],
+    statKey: null,
+  },
 ];
 
 export default function AdminDashboard() {
