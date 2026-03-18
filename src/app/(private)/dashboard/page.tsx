@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [recentMessages, setRecentMessages] = useState<RecentMessage[]>([]);
   const [recentPhotos, setRecentPhotos] = useState<RecentPhoto[]>([]);
   const [activePolls, setActivePolls] = useState<ActivePollWithMeta[]>([]);
+  const [className, setClassName] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchRecent() {
@@ -68,6 +69,21 @@ export default function DashboardPage() {
 
       setRecentMessages(messagesRes.data || []);
       setRecentPhotos(photosRes.data || []);
+
+      // Fetch class name
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("class_id")
+        .eq("id", user!.id)
+        .single();
+      if (profileData?.class_id) {
+        const { data: classData } = await supabase
+          .from("classes")
+          .select("name")
+          .eq("id", profileData.class_id)
+          .single();
+        if (classData) setClassName(classData.name);
+      }
 
       const rawPolls = pollsRes.data || [];
       if (rawPolls.length > 0 && user) {
@@ -147,7 +163,14 @@ export default function DashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-bold">
             {profile?.full_name || user?.user_metadata?.full_name || profile?.email?.split("@")[0] || "אורח/ת"} 👋
           </h1>
-          <p className="text-white/70 mt-2 text-sm">ברוכים הבאים לאזור האישי של קשת</p>
+          <p className="text-white/70 mt-2 text-sm">
+            ברוכים הבאים לאזור האישי של קשת
+            {className && (
+              <span className="inline-block bg-white/15 rounded-lg px-2.5 py-0.5 ms-2 text-white/90 font-medium">
+                {className}
+              </span>
+            )}
+          </p>
         </div>
       </div>
 

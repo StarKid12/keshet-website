@@ -3,6 +3,7 @@
 -- Lesson options that teachers/admins add for students to pick from
 CREATE TABLE timetable_options (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID REFERENCES classes(id) ON DELETE CASCADE,
   day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 4),
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,

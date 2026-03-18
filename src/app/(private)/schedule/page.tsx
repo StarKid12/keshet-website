@@ -9,12 +9,19 @@ import { Input } from "@/components/ui/Input";
 
 interface TimetableOption {
   id: string;
+  class_id: string | null;
   day_of_week: number;
   start_time: string;
   end_time: string;
   subject: string;
   teacher_name: string | null;
   room: string | null;
+}
+
+interface ClassInfo {
+  id: string;
+  name: string;
+  grade_level: number;
 }
 
 interface StudentEntry {
@@ -51,6 +58,8 @@ export default function SchedulePage() {
   const { profile, user } = useUser();
   const [options, setOptions] = useState<TimetableOption[]>([]);
   const [entries, setEntries] = useState<StudentEntry[]>([]);
+  const [myClasses, setMyClasses] = useState<ClassInfo[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   // Picker modal state
@@ -63,18 +72,63 @@ export default function SchedulePage() {
 
   const canEdit = profile?.role === "student" || profile?.role === "teacher" || profile?.role === "admin";
 
+  // Fetch user's classes on mount
+  useEffect(() => {
+    async function fetchClasses() {
+      if (!profile || !user) return;
+      const supabase = createClient();
+      const classIds: string[] = [];
+
+      // Student/parent: use their class_id
+      if (profile.class_id) {
+        classIds.push(profile.class_id);
+      }
+
+      // Teacher: also find classes where they are the teacher
+      if (profile.role === "teacher" || profile.role === "admin") {
+        const { data: teacherClasses } = await supabase
+          .from("classes")
+          .select("id")
+          .eq("teacher_id", user.id);
+        if (teacherClasses) {
+          for (const c of teacherClasses) {
+            if (!classIds.includes(c.id)) classIds.push(c.id);
+          }
+        }
+      }
+
+      if (classIds.length > 0) {
+        const { data: classData } = await supabase
+          .from("classes")
+          .select("id, name, grade_level")
+          .in("id", classIds)
+          .order("grade_level");
+        setMyClasses(classData || []);
+        if (classData && classData.length > 0) {
+          setSelectedClassId(classData[0].id);
+        }
+      }
+    }
+    fetchClasses();
+  }, [profile, user]);
+
   const fetchData = useCallback(async () => {
+    if (!selectedClassId) {
+      setLoading(false);
+      return;
+    }
     const supabase = createClient();
 
-    // Always fetch options (available to all approved users)
+    // Fetch options for the selected class
     const { data: optData } = await supabase
       .from("timetable_options")
       .select("*")
+      .eq("class_id", selectedClassId)
       .order("day_of_week")
       .order("start_time");
     setOptions(optData || []);
 
-    // Fetch own timetable entries (students, teachers, admins)
+    // Fetch own timetable entries
     if (canEdit && user) {
       const { data: entryData } = await supabase
         .from("student_timetable")
@@ -84,7 +138,7 @@ export default function SchedulePage() {
     }
 
     setLoading(false);
-  }, [canEdit, user]);
+  }, [canEdit, user, selectedClassId]);
 
   useEffect(() => {
     if (profile) fetchData();
@@ -259,8 +313,8 @@ export default function SchedulePage() {
     );
   }
 
-  // Parent view: read-only message (parents don't build timetables)
-  if (!canEdit) {
+  // No classes assigned or parent role
+  if (!canEdit || myClasses.length === 0) {
     return (
       <div>
         <div className="mb-8">
@@ -271,19 +325,48 @@ export default function SchedulePage() {
           <svg className="w-16 h-16 text-sand-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <h3 className="text-lg font-medium text-sand-700 mb-2">מערכת השעות אינה זמינה</h3>
-          <p className="text-sand-500">מערכת השעות מיועדת לתלמידים וצוות בית הספר.</p>
+          <h3 className="text-lg font-medium text-sand-700 mb-2">
+            {!canEdit ? "מערכת השעות אינה זמינה" : "לא שויכת לכיתה"}
+          </h3>
+          <p className="text-sand-500">
+            {!canEdit
+              ? "מערכת השעות מיועדת לתלמידים וצוות בית הספר."
+              : "פנו למנהל כדי להשתייך לכיתה."}
+          </p>
         </div>
       </div>
     );
   }
 
+  const selectedClass = myClasses.find((c) => c.id === selectedClassId);
+
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-sand-900">מערכת שעות</h1>
-        <p className="text-sand-500 mt-1">לחצו על תא כדי לבחור שיעור</p>
+        <p className="text-sand-500 mt-1">
+          {selectedClass ? selectedClass.name : "לחצו על תא כדי לבחור שיעור"}
+        </p>
       </div>
+
+      {/* Class selector for teachers/admins with multiple classes */}
+      {myClasses.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {myClasses.map((cls) => (
+            <button
+              key={cls.id}
+              onClick={() => setSelectedClassId(cls.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                selectedClassId === cls.id
+                  ? "bg-primary-600 text-white shadow-sm"
+                  : "bg-white text-sand-700 border border-sand-200 hover:bg-sand-50"
+              }`}
+            >
+              {cls.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Desktop Grid */}
       <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-sand-200 overflow-hidden">
