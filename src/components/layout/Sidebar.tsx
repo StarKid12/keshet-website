@@ -176,10 +176,10 @@ export function Sidebar({ onClose, bgColor, onColorChange }: SidebarProps) {
       {/* Color picker */}
       {onColorChange && (
         <div className="px-5 py-3 border-t border-white/10">
-          <div className="flex items-center gap-2 justify-center">
+          <div className="flex items-center gap-1.5 justify-center">
             <button
               onClick={() => onColorChange("default")}
-              className="w-6 h-6 rounded-full border-2 transition-all duration-200 bg-sand-50 shrink-0"
+              className="w-5 h-5 rounded-full border-2 transition-all duration-200 bg-sand-50 shrink-0"
               style={{
                 borderColor: bgColor === "default" ? "white" : "rgba(255,255,255,0.2)",
                 transform: bgColor === "default" ? "scale(1.2)" : "scale(1)",
@@ -190,7 +190,7 @@ export function Sidebar({ onClose, bgColor, onColorChange }: SidebarProps) {
               <button
                 key={color}
                 onClick={() => onColorChange(color)}
-                className="w-6 h-6 rounded-full border-2 transition-all duration-200 shrink-0"
+                className="w-5 h-5 rounded-full border-2 transition-all duration-200 shrink-0"
                 style={{
                   backgroundColor: color,
                   borderColor: bgColor === color ? "white" : "transparent",
