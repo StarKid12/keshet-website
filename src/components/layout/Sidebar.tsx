@@ -114,7 +114,7 @@ export function Sidebar({ onClose, bgColor, onColorChange }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 py-2 overflow-y-auto">
-        {PRIVATE_NAV_ITEMS.map((item, index) => {
+        {PRIVATE_NAV_ITEMS.filter((item) => profile?.role !== "parent" || item.parentVisible).map((item, index) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`/${item.href.split("/")[1]}`));
           const color = navColors[index % navColors.length];
           return (

@@ -7,11 +7,11 @@ import { createClient } from "@/lib/supabase/client";
 import { RAINBOW_COLORS } from "@/lib/constants";
 import { PollCard, Poll } from "@/components/committees/PollCard";
 
-const quickLinks = [
-  { label: "תמונות כיתה", href: "/photos", color: RAINBOW_COLORS[1], icon: "📸", bg: "from-orange-50 to-amber-50" },
-  { label: "מערכת שעות", href: "/schedule", color: RAINBOW_COLORS[3], icon: "📅", bg: "from-green-50 to-emerald-50" },
-  { label: "הודעות", href: "/messages", color: RAINBOW_COLORS[4], icon: "📬", bg: "from-blue-50 to-sky-50" },
-  { label: "צ׳אט כיתתי", href: "/chat", color: RAINBOW_COLORS[6], icon: "💬", bg: "from-purple-50 to-violet-50" },
+const allQuickLinks = [
+  { label: "תמונות כיתה", href: "/photos", color: RAINBOW_COLORS[1], icon: "📸", bg: "from-orange-50 to-amber-50", parentVisible: true },
+  { label: "מערכת שעות", href: "/schedule", color: RAINBOW_COLORS[3], icon: "📅", bg: "from-green-50 to-emerald-50", parentVisible: false },
+  { label: "הודעות", href: "/messages", color: RAINBOW_COLORS[4], icon: "📬", bg: "from-blue-50 to-sky-50", parentVisible: true },
+  { label: "צ׳אט כיתתי", href: "/chat", color: RAINBOW_COLORS[6], icon: "💬", bg: "from-purple-50 to-violet-50", parentVisible: false },
 ];
 
 interface ActivePollWithMeta {
@@ -195,7 +195,7 @@ export default function DashboardPage() {
 
       {/* Quick Links */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {quickLinks.map((link) => (
+        {allQuickLinks.filter((link) => profile?.role !== "parent" || link.parentVisible).map((link) => (
           <Link
             key={link.href}
             href={link.href}
