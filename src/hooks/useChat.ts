@@ -15,6 +15,14 @@ interface ChatMessage {
   };
 }
 
+async function fetchSenderInfo(supabase: ReturnType<typeof createClient>, senderId: string) {
+  const { data } = await supabase.rpc("get_profile_display", { user_id: senderId });
+  if (data && data.length > 0) {
+    return { full_name: data[0].full_name, avatar_url: data[0].avatar_url };
+  }
+  return undefined;
+}
+
 export function useChat(classId: string | null, userId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,17 +33,37 @@ export function useChat(classId: string | null, userId: string | null) {
     if (!classId) return;
 
     async function fetchMessages() {
+      // Fetch messages without joining profiles (to avoid RLS issues)
       const { data } = await supabaseRef.current
         .from("chat_messages")
-        .select(`
-          id, class_id, sender_id, content, created_at,
-          sender:profiles!sender_id(full_name, avatar_url)
-        `)
+        .select("id, class_id, sender_id, content, created_at")
         .eq("class_id", classId)
         .order("created_at", { ascending: true })
         .limit(100);
 
-      setMessages((data as unknown as ChatMessage[]) || []);
+      if (!data || data.length === 0) {
+        setMessages([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch sender info for all unique senders via RPC
+      const uniqueSenderIds = [...new Set(data.map((m) => m.sender_id))];
+      const senderMap = new Map<string, { full_name: string | null; avatar_url: string | null }>();
+
+      await Promise.all(
+        uniqueSenderIds.map(async (senderId) => {
+          const info = await fetchSenderInfo(supabaseRef.current, senderId);
+          if (info) senderMap.set(senderId, info);
+        })
+      );
+
+      const messagesWithSenders: ChatMessage[] = data.map((m) => ({
+        ...m,
+        sender: senderMap.get(m.sender_id),
+      }));
+
+      setMessages(messagesWithSenders);
       setLoading(false);
     }
 
@@ -57,16 +85,11 @@ export function useChat(classId: string | null, userId: string | null) {
           filter: `class_id=eq.${classId}`,
         },
         async (payload) => {
-          // Fetch sender info for the new message
-          const { data: sender } = await supabaseRef.current
-            .from("profiles")
-            .select("full_name, avatar_url")
-            .eq("id", payload.new.sender_id)
-            .single();
+          const sender = await fetchSenderInfo(supabaseRef.current, payload.new.sender_id);
 
           const newMessage: ChatMessage = {
             ...(payload.new as ChatMessage),
-            sender: sender || undefined,
+            sender,
           };
 
           setMessages((prev) => [...prev, newMessage]);

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, FormEvent } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useChat } from "@/hooks/useChat";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { RAINBOW_COLORS } from "@/lib/constants";
 
@@ -14,15 +15,67 @@ function getAvatarColor(name: string): string {
   return RAINBOW_COLORS[Math.abs(hash) % RAINBOW_COLORS.length];
 }
 
+interface ClassInfo {
+  id: string;
+  name: string;
+}
+
 export default function ChatPage() {
   const { user, profile } = useUser();
+  const [myClasses, setMyClasses] = useState<ClassInfo[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [classesLoading, setClassesLoading] = useState(true);
+
   const { messages, loading, sendMessage } = useChat(
-    profile?.class_id || null,
+    selectedClassId,
     user?.id || null
   );
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Resolve classes for the user
+  useEffect(() => {
+    if (!user || !profile) return;
+
+    async function fetchClasses() {
+      const supabase = createClient();
+      const classes: ClassInfo[] = [];
+
+      // Get class from profile.class_id (students, parents)
+      if (profile!.class_id) {
+        const { data } = await supabase
+          .from("classes")
+          .select("id, name")
+          .eq("id", profile!.class_id)
+          .single();
+        if (data) classes.push(data);
+      }
+
+      // For teachers/admins, also get classes they teach
+      if (profile!.role === "teacher" || profile!.role === "admin") {
+        const { data } = await supabase
+          .from("classes")
+          .select("id, name")
+          .eq("teacher_id", user!.id);
+        if (data) {
+          for (const c of data) {
+            if (!classes.find((existing) => existing.id === c.id)) {
+              classes.push(c);
+            }
+          }
+        }
+      }
+
+      setMyClasses(classes);
+      if (classes.length > 0) {
+        setSelectedClassId(classes[0].id);
+      }
+      setClassesLoading(false);
+    }
+
+    fetchClasses();
+  }, [user, profile]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -51,7 +104,7 @@ export default function ChatPage() {
     );
   }
 
-  if (!profile?.class_id) {
+  if (!classesLoading && myClasses.length === 0) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="bg-white rounded-2xl p-12 shadow-sm border border-sand-200 text-center">
@@ -70,13 +123,31 @@ export default function ChatPage() {
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-sand-900">צ׳אט כיתתי</h1>
-        <p className="text-sand-500 text-sm">שיחה עם חברי הכיתה</p>
+        {myClasses.length > 1 ? (
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {myClasses.map((cls) => (
+              <button
+                key={cls.id}
+                onClick={() => setSelectedClassId(cls.id)}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                  selectedClassId === cls.id
+                    ? "bg-primary-600 text-white"
+                    : "bg-sand-100 text-sand-600 hover:bg-sand-200"
+                }`}
+              >
+                {cls.name}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sand-500 text-sm">שיחה עם חברי הכיתה</p>
+        )}
       </div>
 
       {/* Messages */}
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-sand-200 overflow-hidden flex flex-col">
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {loading ? (
+          {loading || classesLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full" />
             </div>
