@@ -147,7 +147,7 @@ export default function AdminClassesPage() {
     );
   }
 
-  const teachers = profiles.filter((p) => p.role === "teacher");
+  const teachers = profiles.filter((p) => p.role === "teacher" || p.role === "admin");
 
   function getClassMembers(classId: string) {
     return profiles.filter((p) => p.class_id === classId);

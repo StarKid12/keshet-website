@@ -31,6 +31,7 @@ export default function PhotosPage() {
   const [newEventDate, setNewEventDate] = useState("");
 
   const isTeacherOrAdmin = profile?.role === "teacher" || profile?.role === "admin";
+  const canUpload = isTeacherOrAdmin || profile?.role === "student";
 
   useEffect(() => {
     async function fetchAlbums() {
@@ -111,11 +112,12 @@ export default function PhotosPage() {
         url: urlData.publicUrl,
         uploaded_by: user.id,
         sort_order: i,
+        is_approved: isTeacherOrAdmin,
       });
 
-      // Set as cover photo if album has none
+      // Set as cover photo if album has none (only for approved uploads)
       const album = albums.find((a) => a.id === albumId);
-      if (album && !album.cover_photo_url && i === 0) {
+      if (album && !album.cover_photo_url && i === 0 && isTeacherOrAdmin) {
         await supabase
           .from("photo_albums")
           .update({ cover_photo_url: urlData.publicUrl })
@@ -253,7 +255,7 @@ export default function PhotosPage() {
                   )}
                 </div>
               </a>
-              {isTeacherOrAdmin && (
+              {canUpload && (
                 <div className="px-4 pb-4">
                   <Button
                     variant="outline"
@@ -267,6 +269,9 @@ export default function PhotosPage() {
                   >
                     {uploadingAlbumId === album.id ? "מעלה תמונות..." : "📤 העלאת תמונות"}
                   </Button>
+                  {!isTeacherOrAdmin && (
+                    <p className="text-xs text-sand-400 text-center mt-1.5">התמונות יופיעו לאחר אישור</p>
+                  )}
                 </div>
               )}
             </div>
