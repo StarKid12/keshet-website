@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
-import { RAINBOW_COLORS } from "@/lib/constants";
+import { RAINBOW_COLORS, SCHOOL_HOUSES, getHouseLabel } from "@/lib/constants";
 
 interface UserProfile {
   id: string;
@@ -12,6 +12,7 @@ interface UserProfile {
   role: string;
   is_approved: boolean;
   class_id: string | null;
+  house: string | null;
   created_at: string;
 }
 
@@ -51,6 +52,14 @@ export default function AdminUsersPage() {
     await supabase.from("profiles").update({ role }).eq("id", userId);
     setUsers((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, role } : u))
+    );
+  }
+
+  async function updateHouse(userId: string, house: string | null) {
+    const supabase = createClient();
+    await supabase.from("profiles").update({ house: house || null }).eq("id", userId);
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, house: house || null } : u))
     );
   }
 
@@ -151,6 +160,7 @@ export default function AdminUsersPage() {
                   <th className="text-start p-4 text-sm font-medium text-sand-500">שם</th>
                   <th className="text-start p-4 text-sm font-medium text-sand-500">אימייל</th>
                   <th className="text-start p-4 text-sm font-medium text-sand-500">תפקיד</th>
+                  <th className="text-start p-4 text-sm font-medium text-sand-500">בית</th>
                   <th className="text-start p-4 text-sm font-medium text-sand-500">סטטוס</th>
                   <th className="text-start p-4 text-sm font-medium text-sand-500">פעולות</th>
                 </tr>
@@ -185,6 +195,24 @@ export default function AdminUsersPage() {
                         <option value="teacher">מורה</option>
                         <option value="admin">מנהל</option>
                       </select>
+                    </td>
+                    <td className="p-4">
+                      {user.role === "student" || user.role === "parent" ? (
+                        <select
+                          value={user.house || ""}
+                          onChange={(e) => updateHouse(user.id, e.target.value || null)}
+                          className="text-sm border border-sand-200 rounded-lg px-2 py-1 bg-white"
+                        >
+                          <option value="">—</option>
+                          {SCHOOL_HOUSES.map((h) => (
+                            <option key={h.id} value={h.id}>
+                              {h.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-sm text-sand-400">—</span>
+                      )}
                     </td>
                     <td className="p-4">
                       <span

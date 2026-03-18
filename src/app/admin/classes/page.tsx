@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { RAINBOW_COLORS, GRADE_LEVELS } from "@/lib/constants";
+import { RAINBOW_COLORS, GRADE_LEVELS, SCHOOL_HOUSES, getHouseForGrade, getHouseLabel } from "@/lib/constants";
 
 interface ClassItem {
   id: string;
@@ -22,6 +22,13 @@ interface Profile {
   role: string;
   is_approved: boolean;
   class_id: string | null;
+  house: string | null;
+}
+
+interface StudentClass {
+  id: string;
+  student_id: string;
+  class_id: string;
 }
 
 function getGradeLabel(grade: number): string {
@@ -31,6 +38,7 @@ function getGradeLabel(grade: number): string {
 export default function AdminClassesPage() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [studentClasses, setStudentClasses] = useState<StudentClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null);
 
@@ -50,18 +58,22 @@ export default function AdminClassesPage() {
 
   async function fetchData() {
     const supabase = createClient();
-    const [classesRes, profilesRes] = await Promise.all([
+    const [classesRes, profilesRes, scRes] = await Promise.all([
       supabase
         .from("classes")
         .select("*")
         .order("grade_level", { ascending: true }),
       supabase
         .from("profiles")
-        .select("id, email, full_name, role, is_approved, class_id")
+        .select("id, email, full_name, role, is_approved, class_id, house")
         .order("full_name", { ascending: true }),
+      supabase
+        .from("student_classes")
+        .select("id, student_id, class_id"),
     ]);
     setClasses(classesRes.data || []);
     setProfiles(profilesRes.data || []);
+    setStudentClasses(scRes.data || []);
     setLoading(false);
   }
 
@@ -100,6 +112,7 @@ export default function AdminClassesPage() {
       .update({ class_id: null })
       .eq("class_id", classId);
 
+    // Junction table entries cascade-deleted by FK
     const { error } = await supabase.from("classes").delete().eq("id", classId);
     if (error) {
       alert("שגיאה במחיקת כיתה: " + error.message);
@@ -109,6 +122,7 @@ export default function AdminClassesPage() {
     setProfiles((prev) =>
       prev.map((p) => (p.class_id === classId ? { ...p, class_id: null } : p))
     );
+    setStudentClasses((prev) => prev.filter((sc) => sc.class_id !== classId));
     if (expandedClassId === classId) setExpandedClassId(null);
   }
 
@@ -127,35 +141,76 @@ export default function AdminClassesPage() {
 
   async function assignUserToClass(userId: string, classId: string) {
     const supabase = createClient();
-    await supabase
-      .from("profiles")
-      .update({ class_id: classId })
-      .eq("id", userId);
-    setProfiles((prev) =>
-      prev.map((p) => (p.id === userId ? { ...p, class_id: classId } : p))
-    );
+    // Add to junction table
+    const { data: sc } = await supabase
+      .from("student_classes")
+      .insert({ student_id: userId, class_id: classId })
+      .select()
+      .single();
+    if (sc) {
+      setStudentClasses((prev) => [...prev, sc]);
+    }
+    // Also set profiles.class_id if not already set (primary class)
+    const profile = profiles.find((p) => p.id === userId);
+    if (profile && !profile.class_id) {
+      await supabase.from("profiles").update({ class_id: classId }).eq("id", userId);
+      setProfiles((prev) =>
+        prev.map((p) => (p.id === userId ? { ...p, class_id: classId } : p))
+      );
+    }
   }
 
-  async function removeUserFromClass(userId: string) {
+  async function removeUserFromClass(userId: string, classId: string) {
     const supabase = createClient();
+    // Remove from junction table
     await supabase
-      .from("profiles")
-      .update({ class_id: null })
-      .eq("id", userId);
-    setProfiles((prev) =>
-      prev.map((p) => (p.id === userId ? { ...p, class_id: null } : p))
+      .from("student_classes")
+      .delete()
+      .eq("student_id", userId)
+      .eq("class_id", classId);
+    setStudentClasses((prev) =>
+      prev.filter((sc) => !(sc.student_id === userId && sc.class_id === classId))
     );
+    // If this was the primary class, update to another or null
+    const profile = profiles.find((p) => p.id === userId);
+    if (profile?.class_id === classId) {
+      const remaining = studentClasses.filter(
+        (sc) => sc.student_id === userId && sc.class_id !== classId
+      );
+      const newClassId = remaining.length > 0 ? remaining[0].class_id : null;
+      await supabase.from("profiles").update({ class_id: newClassId }).eq("id", userId);
+      setProfiles((prev) =>
+        prev.map((p) => (p.id === userId ? { ...p, class_id: newClassId } : p))
+      );
+    }
   }
 
   const teachers = profiles.filter((p) => p.role === "teacher" || p.role === "admin");
 
   function getClassMembers(classId: string) {
-    return profiles.filter((p) => p.class_id === classId);
+    const memberIds = new Set(
+      studentClasses
+        .filter((sc) => sc.class_id === classId)
+        .map((sc) => sc.student_id)
+    );
+    // Also include profiles with class_id directly (teachers, legacy)
+    profiles.forEach((p) => {
+      if (p.class_id === classId) memberIds.add(p.id);
+    });
+    return profiles.filter((p) => memberIds.has(p.id));
   }
 
   function getStudentCount(classId: string) {
+    const memberIds = new Set(
+      studentClasses
+        .filter((sc) => sc.class_id === classId)
+        .map((sc) => sc.student_id)
+    );
+    profiles.forEach((p) => {
+      if (p.class_id === classId) memberIds.add(p.id);
+    });
     return profiles.filter(
-      (p) => p.class_id === classId && (p.role === "student" || p.role === "parent")
+      (p) => memberIds.has(p.id) && (p.role === "student" || p.role === "parent")
     ).length;
   }
 
@@ -165,17 +220,27 @@ export default function AdminClassesPage() {
     return teacher?.full_name || teacher?.email || null;
   }
 
-  const unassignedUsers = profiles.filter(
-    (p) => !p.class_id && p.role !== "admin"
-  );
+  function getAvailableUsersForClass(classId: string) {
+    const cls = classes.find((c) => c.id === classId);
+    const classHouse = cls ? getHouseForGrade(cls.grade_level) : null;
+    const memberIds = new Set(
+      studentClasses
+        .filter((sc) => sc.class_id === classId)
+        .map((sc) => sc.student_id)
+    );
+    // Also include profiles already in this class
+    profiles.forEach((p) => {
+      if (p.class_id === classId) memberIds.add(p.id);
+    });
 
-  const filteredUnassigned = assignSearch
-    ? unassignedUsers.filter(
-        (p) =>
-          (p.full_name?.includes(assignSearch) ?? false) ||
-          p.email.includes(assignSearch)
-      )
-    : unassignedUsers;
+    return profiles.filter((p) => {
+      if (memberIds.has(p.id)) return false; // Already in this class
+      if (p.role === "admin") return false;
+      // Filter by house if the class has a house and the student has a house set
+      if (classHouse && p.house && p.house !== classHouse) return false;
+      return true;
+    });
+  }
 
   const roleLabels: Record<string, string> = {
     admin: "מנהל",
@@ -395,7 +460,7 @@ export default function AdminClassesPage() {
                                 </div>
                               </div>
                               <button
-                                onClick={() => removeUserFromClass(member.id)}
+                                onClick={() => removeUserFromClass(member.id, cls.id)}
                                 className="p-1.5 rounded-lg hover:bg-rainbow-red/10 transition-colors text-sand-400 hover:text-rainbow-red"
                                 title="הסרה מהכיתה"
                               >
@@ -421,54 +486,82 @@ export default function AdminClassesPage() {
 
                     {/* Add Users */}
                     <div className="p-5 border-t border-sand-200">
-                      <h4 className="font-medium text-sand-900 mb-3">
-                        הוספת משתמשים לכיתה
-                      </h4>
-                      <Input
-                        placeholder="חיפוש לפי שם או אימייל..."
-                        value={assignSearch}
-                        onChange={(e) => setAssignSearch(e.target.value)}
-                        className="mb-3"
-                      />
-                      {filteredUnassigned.length === 0 ? (
-                        <p className="text-sm text-sand-400">
-                          {assignSearch
-                            ? "לא נמצאו משתמשים"
-                            : "אין משתמשים ללא כיתה"}
-                        </p>
-                      ) : (
-                        <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-lg border border-sand-200 p-2">
-                          {filteredUnassigned.slice(0, 20).map((user) => (
-                            <div
-                              key={user.id}
-                              className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-sand-50 transition-colors"
-                            >
-                              <div>
-                                <span className="text-sm font-medium text-sand-900">
-                                  {user.full_name || user.email}
+                      {(() => {
+                        const classHouse = getHouseForGrade(cls.grade_level);
+                        const available = getAvailableUsersForClass(cls.id);
+                        const filtered = assignSearch
+                          ? available.filter(
+                              (p) =>
+                                (p.full_name?.includes(assignSearch) ?? false) ||
+                                p.email.includes(assignSearch)
+                            )
+                          : available;
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-medium text-sand-900">
+                                הוספת משתמשים לכיתה
+                              </h4>
+                              {classHouse && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-primary-100 text-primary-700 font-medium">
+                                  מציג: {getHouseLabel(classHouse)}
                                 </span>
-                                <span className="text-xs text-sand-400 ms-2">
-                                  {roleLabels[user.role] || user.role}
-                                </span>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  assignUserToClass(user.id, cls.id)
-                                }
-                              >
-                                שייך
-                              </Button>
+                              )}
                             </div>
-                          ))}
-                          {filteredUnassigned.length > 20 && (
-                            <p className="text-xs text-sand-400 text-center py-1">
-                              ועוד {filteredUnassigned.length - 20} משתמשים...
-                            </p>
-                          )}
-                        </div>
-                      )}
+                            <Input
+                              placeholder="חיפוש לפי שם או אימייל..."
+                              value={assignSearch}
+                              onChange={(e) => setAssignSearch(e.target.value)}
+                              className="mb-3"
+                            />
+                            {filtered.length === 0 ? (
+                              <p className="text-sm text-sand-400">
+                                {assignSearch
+                                  ? "לא נמצאו משתמשים"
+                                  : "אין משתמשים זמינים לשיוך"}
+                              </p>
+                            ) : (
+                              <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-lg border border-sand-200 p-2">
+                                {filtered.slice(0, 20).map((user) => (
+                                  <div
+                                    key={user.id}
+                                    className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-sand-50 transition-colors"
+                                  >
+                                    <div>
+                                      <span className="text-sm font-medium text-sand-900">
+                                        {user.full_name || user.email}
+                                      </span>
+                                      <span className="text-xs text-sand-400 ms-2">
+                                        {roleLabels[user.role] || user.role}
+                                      </span>
+                                      {user.house && (
+                                        <span className="text-xs text-primary-600 ms-2">
+                                          {getHouseLabel(user.house)}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        assignUserToClass(user.id, cls.id)
+                                      }
+                                    >
+                                      שייך
+                                    </Button>
+                                  </div>
+                                ))}
+                                {filtered.length > 20 && (
+                                  <p className="text-xs text-sand-400 text-center py-1">
+                                    ועוד {filtered.length - 20} משתמשים...
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     {/* Delete Class */}

@@ -42,8 +42,22 @@ export default function ChatPage() {
       const supabase = createClient();
       const classes: ClassInfo[] = [];
 
-      // Get class from profile.class_id (students, parents)
-      if (profile!.class_id) {
+      // Get classes from junction table (students/parents with multi-class)
+      const { data: scData } = await supabase
+        .from("student_classes")
+        .select("class_id")
+        .eq("student_id", user!.id);
+      if (scData && scData.length > 0) {
+        const classIds = scData.map((sc) => sc.class_id);
+        const { data } = await supabase
+          .from("classes")
+          .select("id, name")
+          .in("id", classIds);
+        if (data) classes.push(...data);
+      }
+
+      // Fallback: get class from profile.class_id if not already found
+      if (profile!.class_id && !classes.find((c) => c.id === profile!.class_id)) {
         const { data } = await supabase
           .from("classes")
           .select("id, name")

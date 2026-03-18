@@ -63,6 +63,22 @@ export const TIMETABLE_SLOTS = [
   { start: "15:15", end: "16:00", type: "lesson" as const },
 ] as const;
 
+export const SCHOOL_HOUSES = [
+  { id: "beit_tseirim", label: "בית צעירים", grades: [0, 1, 2] },
+  { id: "hamama", label: "חממה", grades: [3, 4, 5] },
+  { id: "shkbag", label: 'שכב"ג', grades: [6, 7, 8] },
+  { id: "tichon", label: "תיכון", grades: [9, 10, 11, 12] },
+] as const;
+
+export function getHouseForGrade(grade: number): string | null {
+  const house = SCHOOL_HOUSES.find((h) => (h.grades as readonly number[]).includes(grade));
+  return house?.id ?? null;
+}
+
+export function getHouseLabel(houseId: string): string {
+  return SCHOOL_HOUSES.find((h) => h.id === houseId)?.label ?? houseId;
+}
+
 export const RAINBOW_COLORS = [
   "#e74c3c", // red
   "#f39c12", // orange
