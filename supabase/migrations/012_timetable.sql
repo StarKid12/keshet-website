@@ -64,7 +64,7 @@ CREATE POLICY "Admins and teachers can delete timetable options"
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'teacher'))
   );
 
--- Student timetable: fully private, only the student themselves can access
+-- Student timetable: fully private, any approved user can manage their own
 CREATE POLICY "Users can view own timetable"
   ON student_timetable FOR SELECT
   TO authenticated
@@ -75,6 +75,7 @@ CREATE POLICY "Users can insert own timetable entries"
   TO authenticated
   WITH CHECK (
     student_id = auth.uid()
+    AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_approved = true)
   );
 
 CREATE POLICY "Users can update own timetable entries"

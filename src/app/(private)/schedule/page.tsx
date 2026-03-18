@@ -61,7 +61,7 @@ export default function SchedulePage() {
   const [customRoom, setCustomRoom] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const isStudent = profile?.role === "student";
+  const canEdit = profile?.role === "student" || profile?.role === "teacher" || profile?.role === "admin";
 
   const fetchData = useCallback(async () => {
     const supabase = createClient();
@@ -74,8 +74,8 @@ export default function SchedulePage() {
       .order("start_time");
     setOptions(optData || []);
 
-    // Fetch student's own timetable entries (only works for students due to RLS)
-    if (isStudent && user) {
+    // Fetch own timetable entries (students, teachers, admins)
+    if (canEdit && user) {
       const { data: entryData } = await supabase
         .from("student_timetable")
         .select("*")
@@ -84,7 +84,7 @@ export default function SchedulePage() {
     }
 
     setLoading(false);
-  }, [isStudent, user]);
+  }, [canEdit, user]);
 
   useEffect(() => {
     if (profile) fetchData();
@@ -103,7 +103,7 @@ export default function SchedulePage() {
   }
 
   function openPicker(dayIndex: number, slot: (typeof TIMETABLE_SLOTS)[number]) {
-    if (!isStudent) return;
+    if (!canEdit) return;
     setPicker({ dayIndex, slot });
     setShowCustom(false);
     setCustomSubject("");
@@ -259,8 +259,8 @@ export default function SchedulePage() {
     );
   }
 
-  // Non-student view: show message that this is for students only
-  if (!isStudent) {
+  // Parent view: read-only message (parents don't build timetables)
+  if (!canEdit) {
     return (
       <div>
         <div className="mb-8">
@@ -271,16 +271,8 @@ export default function SchedulePage() {
           <svg className="w-16 h-16 text-sand-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <h3 className="text-lg font-medium text-sand-700 mb-2">מערכת השעות מיועדת לתלמידים</h3>
-          <p className="text-sand-500">תלמידים יכולים לבנות את מערכת השעות האישית שלהם כאן.</p>
-          {(profile?.role === "admin" || profile?.role === "teacher") && (
-            <p className="text-sm text-sand-400 mt-4">
-              לניהול שיעורים זמינים, עברו ל
-              <a href="/admin/timetable" className="text-primary-600 hover:text-primary-700 font-medium me-1">
-                ניהול מערכת שעות
-              </a>
-            </p>
-          )}
+          <h3 className="text-lg font-medium text-sand-700 mb-2">מערכת השעות אינה זמינה</h3>
+          <p className="text-sand-500">מערכת השעות מיועדת לתלמידים וצוות בית הספר.</p>
         </div>
       </div>
     );
