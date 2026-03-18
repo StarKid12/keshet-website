@@ -4,9 +4,13 @@
 -- Add is_approved column (default true for backward compat with existing photos)
 ALTER TABLE photos ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT TRUE;
 
--- Drop old policies
+-- Drop old and current policies (safe to re-run)
 DROP POLICY IF EXISTS "Approved users can view photos" ON photos;
 DROP POLICY IF EXISTS "Admin/teacher can manage photos" ON photos;
+DROP POLICY IF EXISTS "Users can view approved photos" ON photos;
+DROP POLICY IF EXISTS "Approved users can upload photos" ON photos;
+DROP POLICY IF EXISTS "Admin/teacher can update photos" ON photos;
+DROP POLICY IF EXISTS "Admin/teacher can delete photos" ON photos;
 
 -- Students/parents only see approved photos in their class; teachers/admins see all
 CREATE POLICY "Users can view approved photos"
@@ -60,6 +64,7 @@ CREATE POLICY "Admin/teacher can delete photos"
 
 -- Update storage: allow approved students to upload too
 DROP POLICY IF EXISTS "Teachers and admins can upload class photos" ON storage.objects;
+DROP POLICY IF EXISTS "Approved users can upload class photos" ON storage.objects;
 CREATE POLICY "Approved users can upload class photos"
   ON storage.objects FOR INSERT
   TO authenticated

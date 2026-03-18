@@ -24,6 +24,7 @@ export default function PhotosPage() {
   const [creating, setCreating] = useState(false);
   const [uploadingAlbumId, setUploadingAlbumId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingAlbumIdRef = useRef<string | null>(null);
 
   // New album form state
   const [newTitle, setNewTitle] = useState("");
@@ -91,6 +92,7 @@ export default function PhotosPage() {
 
     setUploadingAlbumId(albumId);
     const supabase = createClient();
+    let uploadedCount = 0;
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -100,13 +102,16 @@ export default function PhotosPage() {
         .from("class-photos")
         .upload(filePath, file);
 
-      if (uploadError) continue;
+      if (uploadError) {
+        alert(`שגיאה בהעלאת ${file.name}: ${uploadError.message}`);
+        continue;
+      }
 
       const { data: urlData } = supabase.storage
         .from("class-photos")
         .getPublicUrl(filePath);
 
-      await supabase.from("photos").insert({
+      const { error: insertError } = await supabase.from("photos").insert({
         album_id: albumId,
         storage_path: filePath,
         url: urlData.publicUrl,
@@ -114,6 +119,13 @@ export default function PhotosPage() {
         sort_order: i,
         is_approved: isTeacherOrAdmin,
       });
+
+      if (insertError) {
+        alert(`שגיאה בשמירת ${file.name}: ${insertError.message}`);
+        continue;
+      }
+
+      uploadedCount++;
 
       // Set as cover photo if album has none (only for approved uploads)
       const album = albums.find((a) => a.id === albumId);
@@ -132,6 +144,10 @@ export default function PhotosPage() {
     }
 
     setUploadingAlbumId(null);
+    if (uploadedCount > 0) {
+      // Refresh the page to show new photos
+      window.location.href = `/photos/${albumId}`;
+    }
   }
 
   return (
@@ -200,8 +216,8 @@ export default function PhotosPage() {
         multiple
         className="hidden"
         onChange={(e) => {
-          if (e.target.files && uploadingAlbumId) {
-            handleUploadPhotos(uploadingAlbumId, e.target.files);
+          if (e.target.files && pendingAlbumIdRef.current) {
+            handleUploadPhotos(pendingAlbumIdRef.current, e.target.files);
           }
           e.target.value = "";
         }}
@@ -262,6 +278,7 @@ export default function PhotosPage() {
                     size="sm"
                     disabled={uploadingAlbumId === album.id}
                     onClick={() => {
+                      pendingAlbumIdRef.current = album.id;
                       setUploadingAlbumId(album.id);
                       fileInputRef.current?.click();
                     }}
