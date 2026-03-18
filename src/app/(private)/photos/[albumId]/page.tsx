@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/useUser";
-import { RAINBOW_COLORS } from "@/lib/constants";
+import { Button } from "@/components/ui/Button";
 
 interface Photo {
   id: string;
@@ -24,12 +24,14 @@ interface Album {
 
 export default function AlbumDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const albumId = params.albumId as string;
   const { user, profile } = useUser();
   const [album, setAlbum] = useState<Album | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const isTeacherOrAdmin = profile?.role === "teacher" || profile?.role === "admin";
 
@@ -55,9 +57,8 @@ export default function AlbumDetailPage() {
     }
   }
 
-  async function handleReject(photoId: string) {
+  async function handleDeletePhoto(photoId: string) {
     const supabase = createClient();
-    // Delete the photo record and storage file
     const photo = photos.find((p) => p.id === photoId);
     if (photo) {
       const storagePath = photo.url.split("/class-photos/")[1];
@@ -68,7 +69,32 @@ export default function AlbumDetailPage() {
     const { error } = await supabase.from("photos").delete().eq("id", photoId);
     if (!error) {
       setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+      if (selectedPhoto?.id === photoId) setSelectedPhoto(null);
     }
+  }
+
+  async function handleDeleteAlbum() {
+    if (!confirm("למחוק את האלבום וכל התמונות שבו?")) return;
+    setDeleting(true);
+    const supabase = createClient();
+
+    // Delete all storage files for this album
+    const storagePaths = photos
+      .map((p) => p.url.split("/class-photos/")[1])
+      .filter(Boolean)
+      .map((p) => decodeURIComponent(p!));
+    if (storagePaths.length > 0) {
+      await supabase.storage.from("class-photos").remove(storagePaths);
+    }
+
+    // Delete album (cascade deletes photos rows)
+    const { error } = await supabase.from("photo_albums").delete().eq("id", albumId);
+    if (error) {
+      alert(`שגיאה במחיקת האלבום: ${error.message}`);
+      setDeleting(false);
+      return;
+    }
+    router.push("/photos");
   }
 
   return (
@@ -94,7 +120,20 @@ export default function AlbumDetailPage() {
         </div>
       ) : (
         <>
-          <h1 className="text-2xl font-bold text-sand-900 mb-2">{album?.title}</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-bold text-sand-900">{album?.title}</h1>
+            {isTeacherOrAdmin && (
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={deleting}
+                onClick={handleDeleteAlbum}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                {deleting ? "מוחק..." : "מחיקת אלבום"}
+              </Button>
+            )}
+          </div>
           {album?.description && (
             <p className="text-sand-600 mb-6">{album.description}</p>
           )}
@@ -131,19 +170,21 @@ export default function AlbumDetailPage() {
                       </div>
                     )}
                   </button>
-                  {isTeacherOrAdmin && !photo.is_approved && (
+                  {isTeacherOrAdmin && (
                     <div className="flex gap-2 mt-2">
+                      {!photo.is_approved && (
+                        <button
+                          onClick={() => handleApprove(photo.id)}
+                          className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                        >
+                          אישור
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleApprove(photo.id)}
-                        className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
-                      >
-                        אישור
-                      </button>
-                      <button
-                        onClick={() => handleReject(photo.id)}
+                        onClick={() => handleDeletePhoto(photo.id)}
                         className="flex-1 text-xs font-medium py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
                       >
-                        דחייה
+                        מחיקה
                       </button>
                     </div>
                   )}
@@ -174,11 +215,24 @@ export default function AlbumDetailPage() {
             className="max-w-full max-h-[85vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
-          {selectedPhoto.caption && (
-            <p className="absolute bottom-6 text-white text-center bg-black/50 px-4 py-2 rounded-lg">
-              {selectedPhoto.caption}
-            </p>
-          )}
+          <div className="absolute bottom-6 flex items-center gap-3">
+            {selectedPhoto.caption && (
+              <p className="text-white text-center bg-black/50 px-4 py-2 rounded-lg">
+                {selectedPhoto.caption}
+              </p>
+            )}
+            {isTeacherOrAdmin && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm("למחוק תמונה זו?")) handleDeletePhoto(selectedPhoto.id);
+                }}
+                className="bg-red-600/80 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+              >
+                מחיקה
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
