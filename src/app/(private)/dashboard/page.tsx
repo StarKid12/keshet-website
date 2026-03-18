@@ -158,19 +158,22 @@ export default function DashboardPage() {
           className="absolute bottom-0 start-0 w-24 h-24 rounded-full opacity-10"
           style={{ background: "white", transform: "translate(-30%, 30%)" }}
         />
-        <div className="relative">
-          <p className="text-white/80 text-sm mb-1">{greeting}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            {profile?.full_name || user?.user_metadata?.full_name || profile?.email?.split("@")[0] || "אורח/ת"} 👋
-          </h1>
-          <p className="text-white/70 mt-2 text-sm">
-            ברוכים הבאים לאזור האישי של קשת
-            {className && (
-              <span className="inline-block bg-white/15 rounded-lg px-2.5 py-0.5 ms-2 text-white/90 font-medium">
-                {className}
-              </span>
-            )}
-          </p>
+        <div className="relative flex items-center justify-between">
+          <div>
+            <p className="text-white/80 text-sm mb-1">{greeting}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              {profile?.full_name || user?.user_metadata?.full_name || profile?.email?.split("@")[0] || "אורח/ת"} 👋
+            </h1>
+            <p className="text-white/70 mt-2 text-sm">
+              ברוכים הבאים לאזור האישי של קשת
+            </p>
+          </div>
+          {className && (
+            <div className="text-start">
+              <p className="text-white/80 text-sm mb-1">כיתה</p>
+              <p className="text-2xl sm:text-3xl font-bold">{className}</p>
+            </div>
+          )}
         </div>
       </div>
 
