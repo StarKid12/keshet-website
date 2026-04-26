@@ -6,7 +6,6 @@ import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { RAINBOW_COLORS } from "@/lib/constants";
-import { RoleSelector } from "@/components/ui/RoleSelector";
 
 interface BlogPost {
   id: string;
@@ -17,7 +16,6 @@ interface BlogPost {
   cover_image_url: string | null;
   is_published: boolean;
   published_at: string | null;
-  target_roles: string[];
   author_id: string;
   created_at: string;
   updated_at: string;
@@ -36,7 +34,6 @@ export default function AdminBlogPage() {
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [published, setPublished] = useState(false);
-  const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -67,7 +64,6 @@ export default function AdminBlogPage() {
     setExcerpt("");
     setContent("");
     setPublished(false);
-    setTargetRoles([]);
     setEditing(null);
     setShowForm(false);
   }
@@ -78,7 +74,6 @@ export default function AdminBlogPage() {
     setExcerpt(post.excerpt || "");
     setContent(post.content);
     setPublished(post.is_published);
-    setTargetRoles(post.target_roles || []);
     setEditing(post);
     setShowForm(true);
   }
@@ -106,7 +101,6 @@ export default function AdminBlogPage() {
           content,
           is_published: published,
           published_at: published ? new Date().toISOString() : null,
-          target_roles: targetRoles,
           updated_at: new Date().toISOString(),
         })
         .eq("id", editing.id);
@@ -115,7 +109,7 @@ export default function AdminBlogPage() {
         setPosts((prev) =>
           prev.map((p) =>
             p.id === editing.id
-              ? { ...p, title, slug: postSlug, excerpt: excerpt || null, content, is_published: published, published_at: published ? new Date().toISOString() : null, target_roles: targetRoles, updated_at: new Date().toISOString() }
+              ? { ...p, title, slug: postSlug, excerpt: excerpt || null, content, is_published: published, published_at: published ? new Date().toISOString() : null, updated_at: new Date().toISOString() }
               : p
           )
         );
@@ -132,7 +126,6 @@ export default function AdminBlogPage() {
           content,
           is_published: published,
           published_at: published ? new Date().toISOString() : null,
-          target_roles: targetRoles,
           author_id: user.id,
         })
         .select()
@@ -240,16 +233,6 @@ export default function AdminBlogPage() {
                 required
               />
             </div>
-            <RoleSelector
-              selectedRoles={targetRoles}
-              onChange={setTargetRoles}
-              label="מי יראה את הפוסט?"
-            />
-            {targetRoles.length > 0 && (
-              <p className="text-xs text-sand-400">
-                פוסט ממוקד לא יופיע בבלוג הציבורי, רק באזור האישי
-              </p>
-            )}
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
