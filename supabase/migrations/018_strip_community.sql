@@ -42,7 +42,15 @@ DROP POLICY IF EXISTS "Teachers and admins can upload class photos" ON storage.o
 DROP POLICY IF EXISTS "Teachers and admins can delete class photos" ON storage.objects;
 DROP POLICY IF EXISTS "Approved users can upload class photos" ON storage.objects;
 
--- 4. Drop now-unused columns on profiles. Leaves id, email, full_name,
+-- 4. Replace blog_posts read policy that depended on profiles.is_approved
+--    and role-targeting (from migration 010). With no community users, blogs
+--    are simply public-once-published, plus admins see drafts.
+DROP POLICY IF EXISTS "Anyone can view public blog posts" ON public.blog_posts;
+DROP POLICY IF EXISTS "Anyone can view published posts" ON public.blog_posts;
+CREATE POLICY "Anyone can view published posts" ON public.blog_posts
+  FOR SELECT USING (is_published = TRUE);
+
+-- 5. Drop now-unused columns on profiles. Leaves id, email, full_name,
 --    avatar_url, role, created_at, updated_at.
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS is_approved;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS class_id;
