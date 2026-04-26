@@ -60,7 +60,7 @@ export default async function EventsPage() {
             <div className="text-center py-16">
               <div className="text-5xl mb-4">📅</div>
               <h2 className="text-xl font-bold text-sand-900 mb-2">אין אירועים קרובים</h2>
-              <p className="text-sand-500">עקבו אחרי ההודעות באזור האישי לעדכונים.</p>
+              <p className="text-sand-500">בקרוב יתפרסמו אירועים חדשים.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -148,7 +148,7 @@ export default async function EventsPage() {
           )}
 
           <p className="text-center mt-10 text-sand-500 text-sm">
-            * לוח האירועים מתעדכן באופן שוטף. עקבו אחרי ההודעות באזור האישי לעדכונים נוספים.
+            * לוח האירועים מתעדכן באופן שוטף.
           </p>
         </Container>
       </section>
