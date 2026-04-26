@@ -51,7 +51,7 @@ export function HeroSpiral() {
           start: "top top",
           end: "+=1500",
           pin: true,
-          scrub: 1.5,
+          scrub: 0.5,
           invalidateOnRefresh: true,
         },
       });
@@ -219,13 +219,23 @@ export function HeroSpiral() {
         ref={wordContainerRef}
         className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
       >
-        <span className="first-word absolute text-6xl sm:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl">
+        <span
+          className="first-word absolute text-6xl sm:text-7xl lg:text-8xl font-black text-white"
+          style={{
+            textShadow: "0 4px 20px rgba(0,0,0,0.5)",
+            willChange: "opacity, transform",
+          }}
+        >
           קשת
         </span>
         {cycleWords.map((word) => (
           <span
             key={word}
-            className="cycle-word absolute text-4xl sm:text-5xl lg:text-6xl font-bold text-white/90 drop-shadow-lg opacity-0"
+            className="cycle-word absolute text-4xl sm:text-5xl lg:text-6xl font-bold text-white/90 opacity-0"
+            style={{
+              textShadow: "0 2px 10px rgba(0,0,0,0.4)",
+              willChange: "opacity, transform",
+            }}
           >
             {word}
           </span>
@@ -241,7 +251,7 @@ export function HeroSpiral() {
               src="/images/logo-circle.png"
               alt="לוגו קשת"
               className="h-40 sm:h-52 lg:h-64 mx-auto rounded-full"
-              style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.2))" }}
+              style={{ boxShadow: "0 0 30px rgba(255,255,255,0.2)" }}
             />
           </div>
 
