@@ -23,6 +23,10 @@ export function HeroSpiral() {
     const cta = ctaRef.current;
     if (!wrapper || !swirl || !wordContainer || !logo || !cta) return;
 
+    // Start at the top so the timeline begins at progress 0, not mid-scrub.
+    // Browsers can restore scroll position before GSAP measures layout.
+    window.scrollTo(0, 0);
+
     const words = wordContainer.querySelectorAll<HTMLElement>(".cycle-word");
     const firstWord = wordContainer.querySelector<HTMLElement>(".first-word");
 
@@ -109,7 +113,26 @@ export function HeroSpiral() {
       };
     });
 
-    return () => mm.revert();
+    // ScrollTrigger measures positions on creation, but at that moment fonts,
+    // images, and Next.js hydration may still be settling — leaving the
+    // timeline stuck at a stale scrub. Refresh after layout has actually
+    // stabilized, and again when the page is restored from bfcache.
+    const refresh = () => ScrollTrigger.refresh();
+    if (document.readyState === "complete") {
+      requestAnimationFrame(refresh);
+    } else {
+      window.addEventListener("load", refresh, { once: true });
+    }
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) refresh();
+    };
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => {
+      window.removeEventListener("load", refresh);
+      window.removeEventListener("pageshow", onPageShow);
+      mm.revert();
+    };
   }, []);
 
   const cycleWords = [
