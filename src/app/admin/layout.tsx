@@ -10,15 +10,9 @@ import { createClient } from "@/lib/supabase/client";
 
 const adminNav = [
   { label: "סקירה כללית", href: "/admin", icon: "📊", color: RAINBOW_COLORS[0] },
-  { label: "משתמשים", href: "/admin/users", icon: "👥", color: RAINBOW_COLORS[1] },
-  { label: "מיילים מאושרים", href: "/admin/approved-emails", icon: "📧", color: RAINBOW_COLORS[2] },
-  { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[3] },
-  { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[4] },
-  { label: "כיתות", href: "/admin/classes", icon: "🏫", color: RAINBOW_COLORS[5] },
-  { label: "הודעות", href: "/admin/messages", icon: "📢", color: RAINBOW_COLORS[6] },
-  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[0] },
-  { label: "ועדות", href: "/admin/committees", icon: "🏛️", color: RAINBOW_COLORS[1] },
-  { label: "מערכת שעות", href: "/admin/timetable", icon: "🕐", color: RAINBOW_COLORS[2] },
+  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[3] },
+  { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[4] },
+  { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[5] },
 ];
 
 export default function AdminLayout({
@@ -47,10 +41,10 @@ export default function AdminLayout({
           <h1 className="text-xl font-bold text-sand-900 mb-2">אין הרשאה</h1>
           <p className="text-sand-500 mb-6">הגישה לדף זה מוגבלת למנהלים בלבד.</p>
           <Link
-            href="/dashboard"
+            href="/"
             className="inline-block bg-primary-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-primary-700 transition-colors"
           >
-            חזרה ללוח הבקרה
+            חזרה לאתר
           </Link>
         </div>
       </div>
@@ -128,13 +122,13 @@ export default function AdminLayout({
           })}
           <div className="mx-5 my-3 border-t border-white/10" />
           <Link
-            href="/dashboard"
+            href="/"
             className="flex items-center gap-3 px-5 py-3 mx-3 rounded-xl text-sm font-medium hover:bg-white/10 transition-all"
           >
             <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/10">
               🏠
             </span>
-            חזרה לאזור האישי
+            חזרה לאתר
           </Link>
         </nav>
 
@@ -190,8 +184,8 @@ export default function AdminLayout({
             );
           })}
           <div className="mx-5 my-3 border-t border-white/10" />
-          <Link href="/dashboard" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 px-5 py-3 mx-3 rounded-xl text-sm hover:bg-white/10">
-            <span>🏠</span> חזרה לאזור האישי
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 px-5 py-3 mx-3 rounded-xl text-sm hover:bg-white/10">
+            <span>🏠</span> חזרה לאתר
           </Link>
         </nav>
       </aside>

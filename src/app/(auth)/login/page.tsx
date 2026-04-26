@@ -14,7 +14,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = searchParams.get("redirect") || "/admin";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -43,7 +43,7 @@ function LoginForm() {
         <Link href="/">
           <img src="/images/logo.png" alt="קשת" className="h-16 mx-auto" />
         </Link>
-        <p className="text-sand-600 mt-2">כניסה לאזור האישי</p>
+        <p className="text-sand-600 mt-2">כניסת צוות</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -75,13 +75,6 @@ function LoginForm() {
           {isLoading ? "מתחבר..." : "כניסה"}
         </Button>
       </form>
-
-      <p className="text-center text-sm text-sand-500 mt-6">
-        אין לכם חשבון?{" "}
-        <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
-          הרשמה
-        </Link>
-      </p>
 
       <div className="mt-6 pt-4 border-t border-sand-100">
         <Link href="/" className="block text-center text-sm text-sand-500 hover:text-sand-700">

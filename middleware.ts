@@ -2,9 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,9 +16,7 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options as Record<string, unknown>)
           );
@@ -29,23 +25,14 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-
-  // Protected routes: /dashboard, /photos, /schedule, /messages, /chat, /admin
-  const isPrivateRoute =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/photos") ||
-    pathname.startsWith("/schedule") ||
-    pathname.startsWith("/messages") ||
-    pathname.startsWith("/chat");
   const isAdminRoute = pathname.startsWith("/admin");
 
-  if (isPrivateRoute || isAdminRoute) {
+  if (isAdminRoute) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -53,30 +40,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check if user is approved
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_approved, role")
+      .select("role")
       .eq("id", user.id)
       .single();
 
-    if (!profile?.is_approved) {
+    if (profile?.role !== "admin") {
       const url = request.nextUrl.clone();
-      url.pathname = "/pending-approval";
-      return NextResponse.redirect(url);
-    }
-
-    if (isAdminRoute && profile.role !== "admin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = "/";
       return NextResponse.redirect(url);
     }
   }
 
-  // Redirect logged-in users away from auth pages
-  if (user && (pathname === "/login" || pathname === "/signup")) {
+  if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/admin";
     return NextResponse.redirect(url);
   }
 

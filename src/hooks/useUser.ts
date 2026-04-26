@@ -8,12 +8,8 @@ interface Profile {
   id: string;
   email: string;
   full_name: string | null;
-  display_name: string | null;
   avatar_url: string | null;
-  role: "admin" | "teacher" | "parent" | "student";
-  is_approved: boolean;
-  class_id: string | null;
-  phone: string | null;
+  role: "admin";
 }
 
 export function useUser() {
@@ -33,13 +29,13 @@ export function useUser() {
         setUser(user);
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("*")
+          .select("id, email, full_name, avatar_url, role")
           .eq("id", user.id)
           .single();
         if (error) {
           console.error("Profile fetch error:", error);
         }
-        setProfile(profile);
+        setProfile(profile as Profile | null);
       }
       setLoading(false);
     }

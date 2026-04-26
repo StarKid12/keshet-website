@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, SITE_NAME } from "@/lib/constants";
-import { Button } from "@/components/ui/Button";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -71,13 +70,6 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </Link>
           ))}
         </nav>
-
-        {/* Login button */}
-        <div className="px-4 pb-4 pt-1">
-          <Link href="/login" onClick={onClose}>
-            <Button className="w-full">כניסה</Button>
-          </Link>
-        </div>
       </div>
     </>
   );

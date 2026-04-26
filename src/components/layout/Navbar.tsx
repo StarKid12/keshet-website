@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, SITE_NAME } from "@/lib/constants";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
 import { MobileMenu } from "./MobileMenu";
 
 export function Navbar() {
@@ -77,15 +76,6 @@ export function Navbar() {
                   {item.label}
                 </Link>
               ))}
-              <Link href="/login" className="ms-3">
-                {isScrolled || !isHome ? (
-                  <Button size="sm" variant="primary">כניסה</Button>
-                ) : (
-                  <button className="px-3 py-1.5 text-sm font-medium rounded-lg border-2 border-white/50 text-white hover:bg-white/10 transition-colors">
-                    כניסה
-                  </button>
-                )}
-              </Link>
             </div>
 
             {/* Mobile Menu Button */}
