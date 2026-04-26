@@ -13,7 +13,6 @@ const defaultContact: ContactInfo = {
   phone: "04-XXX-XXXX",
   email: "info@keshet-school.co.il",
   hours: "ראשון-חמישי 07:30-16:00",
-  fax: "",
   social: { facebook: "", instagram: "" },
 };
 
@@ -122,13 +121,6 @@ export default function ContactContentPage() {
             value={contact.hours}
             onChange={(e) => setContact({ ...contact, hours: e.target.value })}
             placeholder="ראשון-חמישי 07:30-16:00"
-          />
-          <Input
-            label="פקס"
-            value={contact.fax || ""}
-            onChange={(e) => setContact({ ...contact, fax: e.target.value })}
-            placeholder="מספר פקס (אופציונלי)"
-            dir="ltr"
           />
         </ContentSection>
 

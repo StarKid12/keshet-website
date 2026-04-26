@@ -8,7 +8,6 @@ export interface ContactInfo {
   phone: string;
   email: string;
   hours: string;
-  fax?: string;
   map_embed_url?: string;
   social?: {
     facebook?: string;
