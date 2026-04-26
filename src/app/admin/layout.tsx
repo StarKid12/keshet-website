@@ -13,6 +13,7 @@ const adminNav = [
   { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[3] },
   { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[4] },
   { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[5] },
+  { label: "מנהלים", href: "/admin/admins", icon: "👥", color: RAINBOW_COLORS[1] },
 ];
 
 export default function AdminLayout({

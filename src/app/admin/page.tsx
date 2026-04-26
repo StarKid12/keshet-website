@@ -35,6 +35,14 @@ const adminLinks = [
     color: RAINBOW_COLORS[5],
     statKey: "events" as keyof Stats,
   },
+  {
+    title: "מנהלים",
+    description: "הוספה והסרה של מנהלים והזמנת אימיילים חדשים",
+    href: "/admin/admins",
+    icon: "👥",
+    color: RAINBOW_COLORS[1],
+    statKey: null,
+  },
 ];
 
 export default function AdminDashboard() {
