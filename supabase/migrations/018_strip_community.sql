@@ -33,9 +33,10 @@ DROP TABLE IF EXISTS public.schedules CASCADE;
 DROP TABLE IF EXISTS public.classes CASCADE;
 DROP TABLE IF EXISTS public.approved_emails CASCADE;
 
--- 3. Drop the class-photos storage bucket and its policies.
-DELETE FROM storage.objects WHERE bucket_id = 'class-photos';
-DELETE FROM storage.buckets WHERE id = 'class-photos';
+-- 3. Drop class-photos storage policies. The bucket and its objects must be
+--    deleted manually via the Supabase Dashboard (Storage → class-photos →
+--    empty bucket → delete bucket) because Supabase blocks direct deletes
+--    on storage.objects / storage.buckets.
 DROP POLICY IF EXISTS "Authenticated users can view class photos" ON storage.objects;
 DROP POLICY IF EXISTS "Teachers and admins can upload class photos" ON storage.objects;
 DROP POLICY IF EXISTS "Teachers and admins can delete class photos" ON storage.objects;
