@@ -9,11 +9,11 @@ import { RAINBOW_COLORS, SITE_NAME } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 
 const adminNav = [
-  { label: "סקירה כללית", href: "/admin", icon: "📊", color: RAINBOW_COLORS[0] },
-  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[3] },
-  { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[4] },
-  { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[5] },
-  { label: "מנהלים", href: "/admin/admins", icon: "👥", color: RAINBOW_COLORS[1] },
+  { label: "סקירה כללית", href: "/admin", icon: "📊", color: RAINBOW_COLORS[0] }, // red
+  { label: "ניהול תוכן", href: "/admin/content", icon: "📝", color: RAINBOW_COLORS[1] }, // orange
+  { label: "בלוג", href: "/admin/blog", icon: "✍️", color: RAINBOW_COLORS[2] }, // yellow
+  { label: "אירועים", href: "/admin/events", icon: "📅", color: RAINBOW_COLORS[3] }, // green
+  { label: "מנהלים", href: "/admin/admins", icon: "👥", color: RAINBOW_COLORS[4] }, // blue
 ];
 
 export default function AdminLayout({

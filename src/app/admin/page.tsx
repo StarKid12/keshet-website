@@ -16,7 +16,7 @@ const adminLinks = [
     description: "עריכת טקסטים, תמונות וצוות בעמודי האתר",
     href: "/admin/content",
     icon: "📝",
-    color: RAINBOW_COLORS[3],
+    color: RAINBOW_COLORS[1], // orange
     statKey: null,
   },
   {
@@ -24,7 +24,7 @@ const adminLinks = [
     description: "כתיבה, עריכה ופרסום כתבות בבלוג",
     href: "/admin/blog",
     icon: "✍️",
-    color: RAINBOW_COLORS[4],
+    color: RAINBOW_COLORS[2], // yellow
     statKey: "blogPosts" as keyof Stats,
   },
   {
@@ -32,7 +32,7 @@ const adminLinks = [
     description: "יצירה ועריכה של אירועים בלוח השנה",
     href: "/admin/events",
     icon: "📅",
-    color: RAINBOW_COLORS[5],
+    color: RAINBOW_COLORS[3], // green
     statKey: "events" as keyof Stats,
   },
   {
@@ -40,7 +40,7 @@ const adminLinks = [
     description: "הוספה והסרה של מנהלים והזמנת אימיילים חדשים",
     href: "/admin/admins",
     icon: "👥",
-    color: RAINBOW_COLORS[1],
+    color: RAINBOW_COLORS[4], // blue
     statKey: null,
   },
 ];
