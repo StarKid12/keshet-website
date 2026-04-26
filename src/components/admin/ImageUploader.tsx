@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { MediaEmbed, isVideoUrl } from "@/components/ui/MediaEmbed";
 
 interface ImageUploaderProps {
   currentUrl?: string | null;
   onUpload: (file: File) => void;
+  onUrlSet?: (url: string) => void;
   onRemove?: () => void;
   uploading?: boolean;
   label?: string;
@@ -13,16 +15,29 @@ interface ImageUploaderProps {
 export function ImageUploader({
   currentUrl,
   onUpload,
+  onUrlSet,
   onRemove,
   uploading = false,
   label = "תמונה",
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [urlInput, setUrlInput] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) onUpload(file);
   }
+
+  function handleUrlSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = urlInput.trim();
+    if (trimmed && onUrlSet) {
+      onUrlSet(trimmed);
+      setUrlInput("");
+    }
+  }
+
+  const isVideo = isVideoUrl(currentUrl);
 
   return (
     <div>
@@ -31,12 +46,17 @@ export function ImageUploader({
       </label>
       <div className="flex items-start gap-4">
         {currentUrl ? (
-          <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-sand-200 shrink-0">
-            <img
-              src={currentUrl}
+          <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-sand-200 shrink-0 bg-sand-100">
+            <MediaEmbed
+              url={currentUrl}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover border-0"
             />
+            {isVideo && (
+              <div className="absolute bottom-1 start-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[10px] font-medium pointer-events-none">
+                וידאו
+              </div>
+            )}
             {onRemove && (
               <button
                 type="button"
@@ -76,12 +96,12 @@ export function ImageUploader({
             </svg>
           </div>
         )}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 flex-1">
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="px-4 py-2 text-sm font-medium bg-sand-100 text-sand-700 rounded-lg hover:bg-sand-200 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium bg-sand-100 text-sand-700 rounded-lg hover:bg-sand-200 transition-colors disabled:opacity-50 self-start"
           >
             {uploading ? "מעלה..." : currentUrl ? "החלפת תמונה" : "העלאת תמונה"}
           </button>
@@ -93,6 +113,26 @@ export function ImageUploader({
             className="hidden"
           />
           <p className="text-xs text-sand-400">JPG, PNG או WebP. עד 5MB.</p>
+
+          {onUrlSet && (
+            <form onSubmit={handleUrlSubmit} className="flex gap-2 mt-1">
+              <input
+                type="url"
+                dir="ltr"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                placeholder="או הדבקת קישור YouTube / Vimeo"
+                className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-lg border border-sand-300 bg-white text-sand-900 placeholder:text-sand-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!urlInput.trim()}
+                className="px-3 py-1.5 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                החלה
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

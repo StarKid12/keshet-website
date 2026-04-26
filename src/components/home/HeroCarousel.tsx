@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { Button } from "@/components/ui/Button";
+import { MediaEmbed } from "@/components/ui/MediaEmbed";
 import Link from "next/link";
 
 const heroSlides = [
@@ -53,10 +54,11 @@ export function HeroCarousel() {
               key={index}
               className="flex-[0_0_100%] min-w-0 relative h-full"
             >
-              <img
-                src={slide.image}
+              <MediaEmbed
+                url={slide.image}
                 alt={slide.alt}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover border-0"
+                cinematic
               />
             </div>
           ))}

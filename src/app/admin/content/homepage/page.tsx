@@ -196,9 +196,10 @@ export default function HomepageContentPage() {
                     const url = await uploadImage(file, `homepage/${item.title || "highlight"}-${Date.now()}.${file.name.split(".").pop()}`);
                     if (url) onChange({ ...item, image_url: url });
                   }}
+                  onUrlSet={(url) => onChange({ ...item, image_url: url })}
                   onRemove={() => onChange({ ...item, image_url: "" })}
                   uploading={uploading}
-                  label="תמונה"
+                  label="תמונה או וידאו"
                 />
               </div>
             )}

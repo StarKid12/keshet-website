@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { MediaEmbed } from "@/components/ui/MediaEmbed";
 import { RAINBOW_COLORS } from "@/lib/constants";
 
 const highlights = [
@@ -87,11 +88,11 @@ export function HighlightsGrid({ content }: HighlightsGridProps = {}) {
               className="group relative bg-white rounded-2xl overflow-hidden shadow-sm border border-sand-200
                 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="overflow-hidden">
-                <img
-                  src={item.image}
+              <div className="overflow-hidden h-48">
+                <MediaEmbed
+                  url={item.image}
                   alt={item.title}
-                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 border-0"
                 />
               </div>
               {/* Color accent bar */}
