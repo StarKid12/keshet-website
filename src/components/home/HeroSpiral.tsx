@@ -219,17 +219,13 @@ export function HeroSpiral() {
         ref={wordContainerRef}
         className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
       >
-        <span
-          className="first-word absolute text-6xl sm:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl"
-          style={{ willChange: "opacity, transform" }}
-        >
+        <span className="first-word absolute text-6xl sm:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl">
           קשת
         </span>
         {cycleWords.map((word) => (
           <span
             key={word}
             className="cycle-word absolute text-4xl sm:text-5xl lg:text-6xl font-bold text-white/90 drop-shadow-lg opacity-0"
-            style={{ willChange: "opacity, transform" }}
           >
             {word}
           </span>
@@ -238,11 +234,7 @@ export function HeroSpiral() {
 
       {/* === LOGO + CONTENT (revealed after spiral) === */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-        <div
-          ref={logoRef}
-          className="text-center px-4 opacity-0"
-          style={{ willChange: "opacity, transform" }}
-        >
+        <div ref={logoRef} className="text-center px-4 opacity-0">
           {/* School logo */}
           <div className="mb-6">
             <img
