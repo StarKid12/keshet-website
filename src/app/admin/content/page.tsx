@@ -53,6 +53,13 @@ const contentPages = [
     description: "אירועי קהילה, ציטוטים של תלמידים",
     color: RAINBOW_COLORS[6],
   },
+  {
+    label: "הצהרת נגישות",
+    href: "/admin/content/accessibility",
+    icon: "♿",
+    description: "טקסטים ופרטי קשר בעמוד הצהרת הנגישות",
+    color: RAINBOW_COLORS[4],
+  },
 ];
 
 export default function ContentOverviewPage() {
