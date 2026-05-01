@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, SITE_NAME } from "@/lib/constants";
 import { Container } from "@/components/ui/Container";
@@ -50,10 +51,13 @@ export function Navbar() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <img
+              <Image
                 src="/images/logo-circle.png"
                 alt={SITE_NAME}
-                className="h-10 sm:h-12 rounded-full"
+                width={48}
+                height={48}
+                priority
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full"
               />
             </Link>
 
