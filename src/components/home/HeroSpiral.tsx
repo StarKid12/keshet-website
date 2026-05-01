@@ -10,7 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function HeroSpiral() {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const swirlRef = useRef<HTMLDivElement>(null);
+  const swirlRef = useRef<SVGSVGElement>(null);
   const wordContainerRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
@@ -165,31 +165,23 @@ export function HeroSpiral() {
         }}
       />
 
-      {/* === RAINBOW SWIRL SVG ===
-          Wrapped in a div so GSAP transforms the div (cheap GPU composite of
-          a rasterized layer) instead of the SVG itself (forces re-rasterizing
-          all 7 path curves every frame, which is what was making slow scrolls
-          choppy). Visual is identical. */}
-      <div
+      {/* === RAINBOW SWIRL SVG === */}
+      <svg
         ref={swirlRef}
         className="pointer-events-none"
+        width="400"
+        height="400"
+        viewBox="0 0 400 400"
+        fill="none"
         style={{
           position: "absolute",
           top: "50%",
           left: "50%",
-          width: "400px",
-          height: "400px",
           marginTop: "-200px",
           marginLeft: "-200px",
           willChange: "transform, opacity",
         }}
       >
-        <svg
-          width="400"
-          height="400"
-          viewBox="0 0 400 400"
-          fill="none"
-        >
         <path
           d="M200 200 C210 130 270 45 340 75 C410 105 385 210 335 245 C285 280 230 235 200 200Z"
           fill="#e74c3c"
@@ -220,8 +212,7 @@ export function HeroSpiral() {
           fill="#8e44ad"
           opacity="0.9"
         />
-        </svg>
-      </div>
+      </svg>
 
       {/* === CYCLING TEXT (during spiral phase) === */}
       <div
