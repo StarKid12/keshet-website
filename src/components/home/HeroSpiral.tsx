@@ -51,7 +51,7 @@ export function HeroSpiral() {
           start: "top top",
           end: "+=1500",
           pin: true,
-          scrub: 1.5,
+          scrub: 0.5,
           invalidateOnRefresh: true,
         },
       });
