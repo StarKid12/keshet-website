@@ -47,6 +47,13 @@ const contentPages = [
     color: RAINBOW_COLORS[5],
   },
   {
+    label: "הדמוקרטיה בקשת",
+    href: "/admin/content/democracy",
+    icon: "🏛️",
+    description: "עמודי התווך, יום בחיי תלמיד, ציטוט, שאלות נפוצות",
+    color: RAINBOW_COLORS[4],
+  },
+  {
     label: "חיים בקשת",
     href: "/admin/content/community",
     icon: "🎉",
