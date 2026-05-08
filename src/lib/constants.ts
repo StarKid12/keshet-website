@@ -12,6 +12,7 @@ export const NAV_ITEMS = [
   { label: "חיים בקשת", href: "/community" },
   { label: "אירועים", href: "/events" },
   { label: "בלוג", href: "/blog" },
+  { label: "קישורים", href: "/links" },
   { label: "צור קשר", href: "/contact" },
 ] as const;
 

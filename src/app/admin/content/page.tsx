@@ -60,6 +60,13 @@ const contentPages = [
     description: "טקסטים ופרטי קשר בעמוד הצהרת הנגישות",
     color: RAINBOW_COLORS[4],
   },
+  {
+    label: "קישורים שימושיים",
+    href: "/admin/content/links",
+    icon: "🔗",
+    description: "קישורים שיופיעו בעמוד הקישורים (סביבות למידה ועוד)",
+    color: RAINBOW_COLORS[5],
+  },
 ];
 
 export default function ContentOverviewPage() {
