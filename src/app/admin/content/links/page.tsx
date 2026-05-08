@@ -99,13 +99,22 @@ export default function LinksContentPage() {
             addLabel="קישור חדש"
             renderItem={(item, _, onChange) => (
               <div className="space-y-3">
-                <div className="grid grid-cols-[80px_1fr] gap-3">
-                  <Input
-                    label="אייקון"
-                    value={item.icon || ""}
-                    onChange={(e) => onChange({ ...item, icon: e.target.value })}
-                    placeholder="☁️"
-                  />
+                <div className="grid grid-cols-[120px_1fr] gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-sand-700 mb-1.5">אייקון</label>
+                    <div className="flex items-center gap-2">
+                      <div className="w-11 h-11 rounded-lg bg-sand-50 border border-sand-200 flex items-center justify-center text-2xl shrink-0">
+                        {item.icon || "🔗"}
+                      </div>
+                      <input
+                        type="text"
+                        value={item.icon || ""}
+                        onChange={(e) => onChange({ ...item, icon: e.target.value })}
+                        placeholder="☁️"
+                        className="w-full min-w-0 px-2 py-2.5 text-center text-2xl rounded-lg border border-sand-300 bg-white outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                      />
+                    </div>
+                  </div>
                   <Input
                     label="כותרת"
                     value={item.title}
