@@ -15,6 +15,9 @@ const defaults = {
     title: "הצטרפו לקשת",
     description: "אנחנו שמחים שאתם מתעניינים בקשת! הנה כל מה שצריך לדעת על תהליך ההרשמה.",
   },
+  notices: {
+    items: [] as { title: string; url: string }[],
+  },
   steps: {
     heading: "תהליך ההרשמה",
     items: [
@@ -53,6 +56,7 @@ export default async function AdmissionsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c = (key: string) => ({ ...defaults[key as keyof typeof defaults], ...(content[key] as any) });
   const hero = c("hero");
+  const notices = c("notices");
   const steps = c("steps");
   const openDay = c("open_day");
   const faq = c("faq");
@@ -74,6 +78,29 @@ export default async function AdmissionsPage() {
           </div>
         </Container>
       </section>
+
+      {/* Important notices (lottery results, deadlines, etc.) */}
+      {notices.items && notices.items.length > 0 && (
+        <section className="py-8">
+          <Container size="md">
+            <div className="space-y-4">
+              {notices.items.map((notice: { title: string; url: string }, i: number) => (
+                <a
+                  key={`${notice.url}-${i}`}
+                  href={notice.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-[#1a2c52] hover:bg-[#243a6b] text-white text-center py-5 px-6 rounded-md transition-colors shadow-sm border border-white/20 outline outline-1 outline-offset-[-6px] outline-white/30"
+                >
+                  <span className="text-xl sm:text-2xl font-medium tracking-wide">
+                    {notice.title}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Steps */}
       <section className="py-16">
