@@ -140,19 +140,25 @@ export default async function AdmissionsPage() {
               const images: string[] = (openDay.image_urls?.length ? openDay.image_urls : (openDay.image_url ? [openDay.image_url] : [])) as string[];
               if (images.length === 0) return null;
               return (
-                <div className={images.length > 1 ? "grid grid-cols-1 sm:grid-cols-2 gap-px bg-sand-100" : ""}>
+                <div
+                  className={
+                    images.length > 1
+                      ? "grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-sand-50"
+                      : "p-4 bg-sand-50 flex justify-center"
+                  }
+                >
                   {images.map((src, i) => (
                     <a
                       key={`${src}-${i}`}
                       href={openDay.cta_url || undefined}
                       target={openDay.cta_url ? "_blank" : undefined}
                       rel={openDay.cta_url ? "noopener noreferrer" : undefined}
-                      className="block bg-sand-100"
+                      className="block rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow max-w-xs"
                     >
                       <img
                         src={src}
                         alt={openDay.heading || openDay.label}
-                        className="w-full h-auto"
+                        className="block w-full h-auto"
                       />
                     </a>
                   ))}
