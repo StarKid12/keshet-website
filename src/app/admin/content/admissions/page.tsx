@@ -35,11 +35,18 @@ export default function AdmissionsContentPage() {
     ],
   });
 
-  const [openDay, setOpenDay] = useState({
+  const [openDay, setOpenDay] = useState<{
+    label: string;
+    heading: string;
+    description: string;
+    image_urls: string[];
+    cta_url: string;
+    cta_label: string;
+  }>({
     label: "יום פתוח",
     heading: "בואו להכיר אותנו מקרוב",
     description: "ימי פתוח מתקיימים לאורך השנה. צרו קשר לקביעת ביקור אישי או להתעדכן במועד יום הפתוח הקרוב.",
-    image_url: "",
+    image_urls: [],
     cta_url: "",
     cta_label: "הרשמה ליום פתוח",
   });
@@ -60,7 +67,21 @@ export default function AdmissionsContentPage() {
       if (sections.hero) setHero((prev) => ({ ...prev, ...sections.hero }));
       if (sections.notices) setNotices((prev) => ({ ...prev, ...sections.notices }));
       if (sections.steps) setSteps((prev) => ({ ...prev, ...sections.steps }));
-      if (sections.open_day) setOpenDay((prev) => ({ ...prev, ...sections.open_day }));
+      if (sections.open_day) {
+        const raw = sections.open_day as { image_url?: string; image_urls?: string[] } & Record<string, unknown>;
+        // Migrate legacy single image_url → image_urls array
+        const migratedUrls =
+          (Array.isArray(raw.image_urls) && raw.image_urls.length > 0)
+            ? raw.image_urls
+            : raw.image_url
+              ? [raw.image_url]
+              : [];
+        setOpenDay((prev) => ({
+          ...prev,
+          ...raw,
+          image_urls: migratedUrls,
+        }));
+      }
       if (sections.faq) setFaq((prev) => ({ ...prev, ...sections.faq }));
     }
   }, [loading, sections]);
@@ -157,17 +178,32 @@ export default function AdmissionsContentPage() {
             <label className="block text-sm font-medium text-sand-700 mb-1.5">תיאור</label>
             <textarea value={openDay.description} onChange={(e) => setOpenDay({ ...openDay, description: e.target.value })} rows={2} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y" />
           </div>
-          <ImageUploader
-            currentUrl={openDay.image_url || null}
-            onUpload={async (file) => {
-              const url = await uploadImage(file, `admissions/open-day-${Date.now()}.${file.name.split(".").pop()}`);
-              if (url) setOpenDay({ ...openDay, image_url: url });
-            }}
-            onUrlSet={(url) => setOpenDay({ ...openDay, image_url: url })}
-            onRemove={() => setOpenDay({ ...openDay, image_url: "" })}
-            uploading={uploading}
-            label="תמונת ההזמנה (אופציונלי)"
-          />
+          <div>
+            <label className="block text-sm font-medium text-sand-700 mb-1.5">
+              תמונות ההזמנה (אופציונלי — אפשר יותר מאחת)
+            </label>
+            <ListEditor
+              items={openDay.image_urls}
+              onChange={(image_urls) => setOpenDay({ ...openDay, image_urls })}
+              createNew={() => ""}
+              addLabel="תמונה נוספת"
+              renderItem={(url, idx, onChange) => (
+                <ImageUploader
+                  currentUrl={url || null}
+                  onUpload={async (file) => {
+                    const uploaded = await uploadImage(
+                      file,
+                      `admissions/open-day-${idx + 1}-${Date.now()}.${file.name.split(".").pop()}`,
+                    );
+                    if (uploaded) onChange(uploaded);
+                  }}
+                  onUrlSet={(newUrl) => onChange(newUrl)}
+                  uploading={uploading}
+                  label={`תמונה ${idx + 1}`}
+                />
+              )}
+            />
+          </div>
           <Input
             label="קישור לטופס הרשמה (Google Forms וכו')"
             dir="ltr"

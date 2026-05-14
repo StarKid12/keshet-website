@@ -108,11 +108,11 @@ export function ImageUploader({
           <input
             ref={inputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/avif"
             onChange={handleChange}
             className="hidden"
           />
-          <p className="text-xs text-sand-400">JPG, PNG או WebP. עד 5MB.</p>
+          <p className="text-xs text-sand-400">JPG, PNG, WebP או AVIF. עד 5MB.</p>
 
           {onUrlSet && (
             <form onSubmit={handleUrlSubmit} className="flex gap-2 mt-1">

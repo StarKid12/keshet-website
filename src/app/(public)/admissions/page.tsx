@@ -32,7 +32,8 @@ const defaults = {
     label: "יום פתוח",
     heading: "בואו להכיר אותנו מקרוב",
     description: "ימי פתוח מתקיימים לאורך השנה. צרו קשר לקביעת ביקור אישי או להתעדכן במועד יום הפתוח הקרוב.",
-    image_url: "",
+    image_urls: [] as string[],
+    image_url: "", // legacy single-image — read as fallback
     cta_url: "",
     cta_label: "הרשמה ליום פתוח",
   },
@@ -126,20 +127,29 @@ export default async function AdmissionsPage() {
       <section className="py-16 bg-sand-50">
         <Container size="md">
           <div className="bg-white rounded-2xl shadow-lg border border-sand-200 overflow-hidden">
-            {openDay.image_url && (
-              <a
-                href={openDay.cta_url || undefined}
-                target={openDay.cta_url ? "_blank" : undefined}
-                rel={openDay.cta_url ? "noopener noreferrer" : undefined}
-                className="block bg-sand-100"
-              >
-                <img
-                  src={openDay.image_url}
-                  alt={openDay.heading || openDay.label}
-                  className="w-full h-auto"
-                />
-              </a>
-            )}
+            {(() => {
+              const images: string[] = (openDay.image_urls?.length ? openDay.image_urls : (openDay.image_url ? [openDay.image_url] : [])) as string[];
+              if (images.length === 0) return null;
+              return (
+                <div className={images.length > 1 ? "grid grid-cols-1 sm:grid-cols-2 gap-px bg-sand-100" : ""}>
+                  {images.map((src, i) => (
+                    <a
+                      key={`${src}-${i}`}
+                      href={openDay.cta_url || undefined}
+                      target={openDay.cta_url ? "_blank" : undefined}
+                      rel={openDay.cta_url ? "noopener noreferrer" : undefined}
+                      className="block bg-sand-100"
+                    >
+                      <img
+                        src={src}
+                        alt={openDay.heading || openDay.label}
+                        className="w-full h-auto"
+                      />
+                    </a>
+                  ))}
+                </div>
+              );
+            })()}
             <div className="p-8 sm:p-12 text-center">
               <div className="text-sm font-bold mb-3 tracking-wider text-primary-600">{openDay.label}</div>
               <h2 className="text-3xl font-bold text-sand-900 mb-4">{openDay.heading}</h2>
