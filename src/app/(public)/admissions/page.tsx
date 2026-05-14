@@ -15,6 +15,9 @@ const defaults = {
     title: "הצטרפו לקשת",
     description: "אנחנו שמחים שאתם מתעניינים בקשת! הנה כל מה שצריך לדעת על תהליך ההרשמה.",
   },
+  lottery_results: {
+    items: [] as { title: string; url: string }[],
+  },
   steps: {
     heading: "תהליך ההרשמה",
     items: [
@@ -54,6 +57,7 @@ export default async function AdmissionsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c = (key: string) => ({ ...defaults[key as keyof typeof defaults], ...(content[key] as any) });
   const hero = c("hero");
+  const lotteryResults = c("lottery_results");
   const steps = c("steps");
   const openDay = c("open_day");
   const faq = c("faq");
@@ -75,6 +79,29 @@ export default async function AdmissionsPage() {
           </div>
         </Container>
       </section>
+
+      {/* Lottery results — banners at top of page when active */}
+      {lotteryResults.items && lotteryResults.items.length > 0 && (
+        <section className="py-8">
+          <Container size="md">
+            <div className="space-y-4">
+              {lotteryResults.items.map((result: { title: string; url: string }, i: number) => (
+                <a
+                  key={`${result.url}-${i}`}
+                  href={result.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-[#1a2c52] hover:bg-[#243a6b] text-white text-center py-5 px-6 rounded-md transition-colors shadow-sm border border-white/20 outline outline-1 outline-offset-[-6px] outline-white/30"
+                >
+                  <span className="text-xl sm:text-2xl font-medium tracking-wide">
+                    {result.title}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Steps */}
       <section className="py-16">
