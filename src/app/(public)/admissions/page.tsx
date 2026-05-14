@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { RAINBOW_COLORS } from "@/lib/constants";
 import { getPageContent } from "@/lib/cms";
+import { LightboxImage } from "@/components/ui/LightboxImage";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -143,24 +144,17 @@ export default async function AdmissionsPage() {
                 <div
                   className={
                     images.length > 1
-                      ? "grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-sand-50"
-                      : "p-4 bg-sand-50 flex justify-center"
+                      ? "grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 bg-sand-50 justify-items-center"
+                      : "p-6 bg-sand-50 flex justify-center"
                   }
                 >
                   {images.map((src, i) => (
-                    <a
+                    <LightboxImage
                       key={`${src}-${i}`}
-                      href={openDay.cta_url || undefined}
-                      target={openDay.cta_url ? "_blank" : undefined}
-                      rel={openDay.cta_url ? "noopener noreferrer" : undefined}
-                      className="block rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow max-w-xs"
-                    >
-                      <img
-                        src={src}
-                        alt={openDay.heading || openDay.label}
-                        className="block w-full h-auto"
-                      />
-                    </a>
+                      src={src}
+                      alt={openDay.heading || openDay.label}
+                      thumbClassName="rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all w-full max-w-sm"
+                    />
                   ))}
                 </div>
               );
