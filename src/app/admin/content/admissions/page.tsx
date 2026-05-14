@@ -20,10 +20,6 @@ export default function AdmissionsContentPage() {
     description: "אנחנו שמחים שאתם מתעניינים בקשת! הנה כל מה שצריך לדעת על תהליך ההרשמה.",
   });
 
-  const [notices, setNotices] = useState<{ items: { title: string; url: string }[] }>({
-    items: [],
-  });
-
   const [steps, setSteps] = useState({
     heading: "תהליך ההרשמה",
     items: [
@@ -65,7 +61,6 @@ export default function AdmissionsContentPage() {
   useEffect(() => {
     if (!loading && sections) {
       if (sections.hero) setHero((prev) => ({ ...prev, ...sections.hero }));
-      if (sections.notices) setNotices((prev) => ({ ...prev, ...sections.notices }));
       if (sections.steps) setSteps((prev) => ({ ...prev, ...sections.steps }));
       if (sections.open_day) {
         const raw = sections.open_day as { image_url?: string; image_urls?: string[] } & Record<string, unknown>;
@@ -87,7 +82,7 @@ export default function AdmissionsContentPage() {
   }, [loading, sections]);
 
   async function handleSave() {
-    await saveAllSections({ hero, notices, steps, open_day: openDay, faq });
+    await saveAllSections({ hero, steps, open_day: openDay, faq });
   }
 
   if (loading) {
@@ -115,36 +110,6 @@ export default function AdmissionsContentPage() {
             <label className="block text-sm font-medium text-sand-700 mb-1.5">תיאור</label>
             <textarea value={hero.description} onChange={(e) => setHero({ ...hero, description: e.target.value })} rows={2} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y" />
           </div>
-        </ContentSection>
-
-        <ContentSection title="הודעות חשובות (באנרים)">
-          <p className="text-sm text-sand-500 -mt-2">
-            באנרים שמופיעים בראש העמוד — לתוצאות הגרלה, מועדי הרשמה, וכו&apos;. מחקו כשלא רלוונטי.
-          </p>
-          <ListEditor
-            items={notices.items}
-            onChange={(items) => setNotices({ items })}
-            createNew={() => ({ title: "", url: "" })}
-            addLabel="באנר חדש"
-            renderItem={(item, _, onChange) => (
-              <div className="space-y-3">
-                <Input
-                  label="טקסט הבאנר"
-                  value={item.title}
-                  onChange={(e) => onChange({ ...item, title: e.target.value })}
-                  placeholder='תוצאות ההגרלה לתיכון לתשפ"ו'
-                />
-                <Input
-                  label="קישור"
-                  dir="ltr"
-                  type="url"
-                  value={item.url}
-                  onChange={(e) => onChange({ ...item, url: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
-            )}
-          />
         </ContentSection>
 
         <ContentSection title="שלבי הרשמה">
