@@ -80,22 +80,31 @@ export default async function AdmissionsPage() {
         </Container>
       </section>
 
-      {/* Lottery results — banners at top of page when active */}
+      {/* Lottery results — compact entries at top of page when active */}
       {lotteryResults.items && lotteryResults.items.length > 0 && (
-        <section className="py-8">
+        <section className="pt-8 pb-2">
           <Container size="md">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {lotteryResults.items.map((result: { title: string; url: string }, i: number) => (
                 <a
                   key={`${result.url}-${i}`}
                   href={result.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block bg-[#1a2c52] hover:bg-[#243a6b] text-white text-center py-5 px-6 rounded-md transition-colors shadow-sm border border-white/20 outline outline-1 outline-offset-[-6px] outline-white/30"
+                  className="group flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200 hover:border-primary-300 hover:shadow-md transition-all"
                 >
-                  <span className="text-xl sm:text-2xl font-medium tracking-wide">
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0"
+                    style={{ backgroundColor: `${RAINBOW_COLORS[i % RAINBOW_COLORS.length]}15` }}
+                  >
+                    📄
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-sand-800 group-hover:text-primary-700 transition-colors">
                     {result.title}
                   </span>
+                  <svg className="w-4 h-4 text-sand-300 group-hover:text-primary-400 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
                 </a>
               ))}
             </div>
