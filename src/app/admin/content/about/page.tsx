@@ -7,6 +7,7 @@ import { ContentSection } from "@/components/admin/ContentSection";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { SaveButton } from "@/components/admin/SaveButton";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { BoldableTextarea } from "@/components/admin/BoldableTextarea";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import Link from "next/link";
 
@@ -143,15 +144,14 @@ export default function AboutContentPage() {
           {vision.paragraphs.map((p, i) => (
             <div key={i}>
               <label className="block text-sm font-medium text-sand-700 mb-1.5">פסקה {i + 1}</label>
-              <textarea
+              <BoldableTextarea
                 value={p}
-                onChange={(e) => {
+                onChange={(html) => {
                   const newParagraphs = [...vision.paragraphs];
-                  newParagraphs[i] = e.target.value;
+                  newParagraphs[i] = html;
                   setVision({ ...vision, paragraphs: newParagraphs });
                 }}
                 rows={3}
-                className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y"
               />
             </div>
           ))}
@@ -191,7 +191,15 @@ export default function AboutContentPage() {
           {democracy.paragraphs.map((p, i) => (
             <div key={i}>
               <label className="block text-sm font-medium text-sand-700 mb-1.5">פסקה {i + 1}</label>
-              <textarea value={p} onChange={(e) => { const n = [...democracy.paragraphs]; n[i] = e.target.value; setDemocracy({ ...democracy, paragraphs: n }); }} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y" />
+              <BoldableTextarea
+                value={p}
+                onChange={(html) => {
+                  const n = [...democracy.paragraphs];
+                  n[i] = html;
+                  setDemocracy({ ...democracy, paragraphs: n });
+                }}
+                rows={3}
+              />
             </div>
           ))}
           <ListEditor
