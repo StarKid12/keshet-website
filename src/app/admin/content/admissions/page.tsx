@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/Input";
 import { ContentSection } from "@/components/admin/ContentSection";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { SaveButton } from "@/components/admin/SaveButton";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import Link from "next/link";
 
 export default function AdmissionsContentPage() {
   const { sections, loading, saving, success, saveAllSections } =
     useSiteContent("admissions");
+  const { uploadImage, uploading } = useImageUpload();
 
   const [hero, setHero] = useState({
     title: "הצטרפו לקשת",
@@ -32,6 +35,9 @@ export default function AdmissionsContentPage() {
     label: "יום פתוח",
     heading: "בואו להכיר אותנו מקרוב",
     description: "ימי פתוח מתקיימים לאורך השנה. צרו קשר לקביעת ביקור אישי או להתעדכן במועד יום הפתוח הקרוב.",
+    image_url: "",
+    cta_url: "",
+    cta_label: "הרשמה ליום פתוח",
   });
 
   const [faq, setFaq] = useState({
@@ -116,6 +122,31 @@ export default function AdmissionsContentPage() {
             <label className="block text-sm font-medium text-sand-700 mb-1.5">תיאור</label>
             <textarea value={openDay.description} onChange={(e) => setOpenDay({ ...openDay, description: e.target.value })} rows={2} className="w-full px-4 py-2.5 rounded-lg border border-sand-300 bg-white text-sand-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-colors resize-y" />
           </div>
+          <ImageUploader
+            currentUrl={openDay.image_url || null}
+            onUpload={async (file) => {
+              const url = await uploadImage(file, `admissions/open-day-${Date.now()}.${file.name.split(".").pop()}`);
+              if (url) setOpenDay({ ...openDay, image_url: url });
+            }}
+            onUrlSet={(url) => setOpenDay({ ...openDay, image_url: url })}
+            onRemove={() => setOpenDay({ ...openDay, image_url: "" })}
+            uploading={uploading}
+            label="תמונת ההזמנה (אופציונלי)"
+          />
+          <Input
+            label="קישור לטופס הרשמה (Google Forms וכו')"
+            dir="ltr"
+            type="url"
+            value={openDay.cta_url}
+            onChange={(e) => setOpenDay({ ...openDay, cta_url: e.target.value })}
+            placeholder="https://docs.google.com/forms/..."
+          />
+          <Input
+            label="טקסט בכפתור ההרשמה"
+            value={openDay.cta_label}
+            onChange={(e) => setOpenDay({ ...openDay, cta_label: e.target.value })}
+            placeholder="הרשמה ליום פתוח"
+          />
         </ContentSection>
 
         <ContentSection title="שאלות נפוצות">
