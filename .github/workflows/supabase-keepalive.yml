@@ -18,11 +18,15 @@ jobs:
     steps:
       - name: Ping Supabase REST (cache-busted)
         run: |
+          # `offset=$RANDOM` makes each request URL unique so it can't be
+          # served from a CDN cache. PostgREST also accepts it as a real
+          # query param (unlike a made-up `t=...`, which it rejects as
+          # a bad column filter).
           curl -sS -f \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Cache-Control: no-cache" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/site_content?select=page&limit=1&t=$(date +%s)"
+            "${{ secrets.SUPABASE_URL }}/rest/v1/site_content?select=page&limit=1&offset=$((RANDOM % 3))"
 
       - name: Ping Supabase Auth
         run: |
